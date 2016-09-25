@@ -10,7 +10,7 @@ import javax.lang.model.element.Modifier;
  *
  * @author Ben Leitner
  */
-enum Visibility {
+public enum Visibility {
   PUBLIC,
   PROTECTED,
   PACKAGE_LOCAL,

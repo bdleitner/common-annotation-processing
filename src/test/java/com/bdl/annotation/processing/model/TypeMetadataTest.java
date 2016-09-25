@@ -294,7 +294,7 @@ public class TypeMetadataTest {
   public void testGenerateImports() {
     TypeElement element = elements.getTypeElement("com.bdl.annotation.processing.model.ParameterizedMultibound");
     TypeMetadata type = TypeMetadata.fromElement(element);
-    assertThat(type.getImports())
+    assertThat(type.getAllTypes())
         .containsExactly(
             TypeMetadata.builder()
                 .setPackageName("com.bdl.annotation.processing.model")

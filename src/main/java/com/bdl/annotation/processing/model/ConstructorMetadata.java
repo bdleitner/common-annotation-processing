@@ -1,13 +1,11 @@
 package com.bdl.annotation.processing.model;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 
 import java.util.Set;
 
@@ -22,17 +20,17 @@ import javax.lang.model.element.VariableElement;
  * @author Ben Leitner
  */
 @AutoValue
-abstract class ConstructorMetadata implements Comparable<ConstructorMetadata>, GeneratesImports {
+public abstract class ConstructorMetadata implements Comparable<ConstructorMetadata>, UsesTypes {
 
-  abstract Visibility visibility();
+  public abstract Visibility visibility();
 
-  abstract ImmutableList<ParameterMetadata> parameters();
+  public abstract ImmutableList<ParameterMetadata> parameters();
 
   @Override
-  public Set<TypeMetadata> getImports() {
+  public Set<TypeMetadata> getAllTypes() {
     ImmutableSet.Builder<TypeMetadata> imports = ImmutableSet.builder();
     for (ParameterMetadata param : parameters()) {
-      imports.addAll(param.getImports());
+      imports.addAll(param.getAllTypes());
     }
     return imports.build();
   }
@@ -45,18 +43,8 @@ abstract class ConstructorMetadata implements Comparable<ConstructorMetadata>, G
         .result();
   }
 
-  String toString(String className) {
+  public String toString(String className) {
     return String.format("%s%s(%s)", visibility().prefix(), className, Joiner.on(", ").join(parameters()));
-  }
-
-  String superCall() {
-    return String.format("super(%s)", Joiner.on(", ").join(Iterables.transform(parameters(),
-        new Function<ParameterMetadata, String>() {
-          @Override
-          public String apply(ParameterMetadata input) {
-            return input.name();
-          }
-        })));
   }
 
   @Override
@@ -64,7 +52,7 @@ abstract class ConstructorMetadata implements Comparable<ConstructorMetadata>, G
     return toString("Constructor");
   }
 
-  static ConstructorMetadata fromConstructor(Element element) {
+  public static ConstructorMetadata fromConstructor(Element element) {
     Preconditions.checkArgument(element.getKind() == ElementKind.CONSTRUCTOR,
         "Element %s is not a constructor.", element);
 

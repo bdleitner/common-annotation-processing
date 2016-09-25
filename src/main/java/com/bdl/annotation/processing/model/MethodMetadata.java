@@ -1,18 +1,19 @@
 package com.bdl.annotation.processing.model;
 
+import static java.util.Comparator.comparing;
+
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ElementKind;
@@ -27,15 +28,25 @@ import javax.lang.model.element.VariableElement;
  * @author Ben Leitner
  */
 @AutoValue
-abstract class MethodMetadata implements Comparable<MethodMetadata>, GeneratesImports {
+public abstract class MethodMetadata implements Comparable<MethodMetadata>, UsesTypes {
 
-  abstract ImmutableList<AnnotationMetadata> annotations();
-  abstract Visibility visibility();
-  abstract boolean isAbstract();
-  abstract ImmutableList<TypeMetadata> typeParameters();
-  abstract String name();
-  abstract TypeMetadata type();
-  abstract ImmutableList<ParameterMetadata> parameters();
+  private static final Comparator<MethodMetadata> COMPARATOR = comparing(MethodMetadata::visibility)
+      .thenComparing(MethodMetadata::name)
+      .thenComparing(MethodMetadata::parameters, Comparators.forLists(ParameterMetadata::type));
+
+  public abstract ImmutableList<AnnotationMetadata> annotations();
+
+  public abstract Visibility visibility();
+
+  public abstract boolean isAbstract();
+
+  public abstract ImmutableList<TypeMetadata> typeParameters();
+
+  public abstract String name();
+
+  public abstract TypeMetadata type();
+
+  public abstract ImmutableList<ParameterMetadata> parameters();
 
   MethodMetadata convertTypeParameters(Map<String, String> paramNameMap) {
     paramNameMap = augmentParamNameMap(paramNameMap);
@@ -77,23 +88,18 @@ abstract class MethodMetadata implements Comparable<MethodMetadata>, GeneratesIm
 
   @Override
   public int compareTo(MethodMetadata that) {
-    return ComparisonChain.start()
-        .compare(visibility().ordinal(), that.visibility().ordinal())
-        .compare(name(), that.name())
-        .compare(parameters().size(), that.parameters().size())
-        .compare(parameters(), that.parameters(), ParameterMetadata.IMMUTABLE_LIST_COMPARATOR)
-        .result();
+    return COMPARATOR.compare(this, that);
   }
 
   @Override
-  public Set<TypeMetadata> getImports() {
+  public Set<TypeMetadata> getAllTypes() {
     ImmutableSet.Builder<TypeMetadata> imports = ImmutableSet.builder();
     for (TypeMetadata typeParam : typeParameters()) {
-      imports.addAll(typeParam.getImports());
+      imports.addAll(typeParam.getAllTypes());
     }
-    imports.addAll(type().getImports());
+    imports.addAll(type().getAllTypes());
     for (ParameterMetadata param : parameters()) {
-      imports.addAll(param.getImports());
+      imports.addAll(param.getAllTypes());
     }
     return imports.build();
   }
@@ -102,16 +108,13 @@ abstract class MethodMetadata implements Comparable<MethodMetadata>, GeneratesIm
     if (typeParameters().isEmpty()) {
       return "";
     }
-    return String.format("<%s> ", Joiner.on(", ").join(Iterables.transform(typeParameters(),
-        new Function<TypeMetadata, String>() {
-          @Override
-          public String apply(TypeMetadata input) {
-            return input.nameBuilder()
+    return String.format("<%s> ",
+        typeParameters().stream()
+            .map(input -> input.nameBuilder()
                 .addSimpleName()
                 .addBounds()
-                .toString();
-          }
-        })));
+                .toString())
+            .collect(Collectors.joining(", ")));
   }
 
   String fullDescription() {
@@ -169,13 +172,19 @@ abstract class MethodMetadata implements Comparable<MethodMetadata>, GeneratesIm
   }
 
   @AutoValue.Builder
-  public static abstract class Builder {
+  static abstract class Builder {
     abstract ImmutableList.Builder<AnnotationMetadata> annotationsBuilder();
+
     abstract Builder setVisibility(Visibility visibility);
+
     abstract ImmutableList.Builder<TypeMetadata> typeParametersBuilder();
+
     abstract Builder setIsAbstract(boolean isAbstract);
+
     abstract Builder setName(String name);
+
     abstract Builder setType(TypeMetadata Type);
+
     abstract ImmutableList.Builder<ParameterMetadata> parametersBuilder();
 
     Builder addAnnotation(AnnotationMetadata metadata) {

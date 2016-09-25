@@ -9,7 +9,6 @@ import java.util.Set;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 
 /**
@@ -18,25 +17,25 @@ import javax.lang.model.element.ExecutableElement;
  * @author Ben Leitner
  */
 @AutoValue
-abstract class AnnotationMetadata implements GeneratesImports {
+public abstract class AnnotationMetadata implements UsesTypes {
 
   /** The type of the annotation. */
-  abstract TypeMetadata type();
+  public abstract TypeMetadata type();
 
-  abstract ImmutableMap<MethodMetadata, ValueMetadata> values();
+  public abstract ImmutableMap<MethodMetadata, ValueMetadata> values();
 
   @Override
-  public Set<TypeMetadata> getImports() {
+  public Set<TypeMetadata> getAllTypes() {
     ImmutableSet.Builder<TypeMetadata> imports = ImmutableSet.builder();
-    imports.addAll(type().getImports());
+    imports.addAll(type().getAllTypes());
     for (Map.Entry<MethodMetadata, ValueMetadata> entry : values().entrySet()) {
-      imports.addAll(entry.getKey().getImports());
-      imports.addAll(entry.getValue().type().getImports());
+      imports.addAll(entry.getKey().getAllTypes());
+      imports.addAll(entry.getValue().type().getAllTypes());
     }
     return imports.build();
   }
 
-  static AnnotationMetadata fromType(AnnotationMirror mirror) {
+  public static AnnotationMetadata fromType(AnnotationMirror mirror) {
     Builder metadata = AnnotationMetadata.builder();
     metadata.setType(TypeMetadata.fromType(mirror.getAnnotationType()));
     for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry
@@ -47,12 +46,6 @@ abstract class AnnotationMetadata implements GeneratesImports {
           ValueMetadata.create(method.type(), entry.getValue().getValue().toString()));
     }
     return metadata.build();
-  }
-
-  private static String valueFor(Object value) {
-    return value instanceof Element
-        ? ((Element) value).getSimpleName().toString()
-        : value.toString();
   }
 
   static Builder builder() {

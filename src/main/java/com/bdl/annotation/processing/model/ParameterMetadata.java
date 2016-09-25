@@ -1,11 +1,11 @@
 package com.bdl.annotation.processing.model;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 
 import java.util.Comparator;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Data object for parameters.
@@ -13,7 +13,7 @@ import java.util.Set;
  * @author Ben Leitner
  */
 @AutoValue
-abstract class ParameterMetadata implements GeneratesImports {
+public abstract class ParameterMetadata implements UsesTypes {
   static final Comparator<ImmutableList<ParameterMetadata>> IMMUTABLE_LIST_COMPARATOR
       = Comparators.forLists(new Function<ParameterMetadata, TypeMetadata>() {
     @Override
@@ -24,15 +24,15 @@ abstract class ParameterMetadata implements GeneratesImports {
 
   private String name;
 
-  abstract TypeMetadata type();
+  public abstract TypeMetadata type();
 
-  String name() {
+  public String name() {
     return name;
   }
 
   @Override
-  public Set<TypeMetadata> getImports() {
-    return type().getImports();
+  public Set<TypeMetadata> getAllTypes() {
+    return type().getAllTypes();
   }
 
   static ParameterMetadata of(TypeMetadata type, String name) {

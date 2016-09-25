@@ -1,15 +1,14 @@
 package com.bdl.annotation.processing.model;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -20,18 +19,18 @@ import javax.lang.model.type.TypeMirror;
  * @author Ben Leitner
  */
 @AutoValue
-abstract class InheritanceMetadata implements GeneratesMethods, GeneratesImports {
+public abstract class InheritanceMetadata implements GeneratesMethods, UsesTypes {
 
   private ImmutableList<MethodMetadata> allMethods;
 
   /** The type parameters given in the {@code extends} or {@code implements} clause. */
-  abstract ImmutableList<TypeMetadata> inheritanceParams();
+  public abstract ImmutableList<TypeMetadata> inheritanceParams();
 
-  abstract ClassMetadata classMetadata();
+  public abstract ClassMetadata classMetadata();
 
   @Override
-  public Set<TypeMetadata> getImports() {
-    return classMetadata().getImports();
+  public Set<TypeMetadata> getAllTypes() {
+    return classMetadata().getAllTypes();
   }
 
   @Override
@@ -39,14 +38,10 @@ abstract class InheritanceMetadata implements GeneratesMethods, GeneratesImports
     if (allMethods == null) {
       final Map<String, String> paramNamesMap = getParamNamesMap();
       allMethods = ImmutableList.copyOf(
-          Iterables.transform(
-              classMetadata().getAllMethods(),
-              new Function<MethodMetadata, MethodMetadata>() {
-                  @Override
-                  public MethodMetadata apply(MethodMetadata input) {
-                    return input.convertTypeParameters(paramNamesMap);
-                  }
-                }));
+          classMetadata().getAllMethods()
+              .stream()
+              .map(input -> input.convertTypeParameters(paramNamesMap))
+              .collect(Collectors.toList()));
     }
     return allMethods;
   }
@@ -61,7 +56,7 @@ abstract class InheritanceMetadata implements GeneratesMethods, GeneratesImports
     return paramNamesMap.build();
   }
 
-  static InheritanceMetadata fromType(DeclaredType type) {
+  public static InheritanceMetadata fromType(DeclaredType type) {
     Builder metadata = InheritanceMetadata.builder();
     for (TypeMirror typeParam : type.getTypeArguments()) {
       metadata.addInheritanceParam(TypeMetadata.fromType(typeParam));
@@ -77,6 +72,7 @@ abstract class InheritanceMetadata implements GeneratesMethods, GeneratesImports
   @AutoValue.Builder
   abstract static class Builder {
     abstract ImmutableList.Builder<TypeMetadata> inheritanceParamsBuilder();
+
     abstract Builder setClassMetadata(ClassMetadata classMetadata);
 
     Builder addInheritanceParam(TypeMetadata type) {

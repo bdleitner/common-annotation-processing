@@ -8,10 +8,10 @@ import com.google.auto.value.AutoValue;
  * @author Ben Leitner
  */
 @AutoValue
-abstract class ValueMetadata {
+public abstract class ValueMetadata {
 
-  abstract TypeMetadata type();
-  abstract String value();
+  public abstract TypeMetadata type();
+  public abstract String value();
 
   static ValueMetadata create(TypeMetadata type, String value) {
     return new AutoValue_ValueMetadata(type, value);

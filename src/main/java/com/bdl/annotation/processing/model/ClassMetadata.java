@@ -22,10 +22,10 @@ import javax.lang.model.type.TypeMirror;
  * @author Ben Leitner
  */
 @AutoValue
-abstract class ClassMetadata implements GeneratesImports, GeneratesMethods {
+public abstract class ClassMetadata implements UsesTypes, GeneratesMethods {
 
   /** Enumeration of the possible types to AutoAdapt: Class and Interface. */
-  enum Category {
+  public enum Category {
     CLASS,
     INTERFACE;
 
@@ -44,34 +44,34 @@ abstract class ClassMetadata implements GeneratesImports, GeneratesMethods {
   private ImmutableList<MethodMetadata> allMethods;
 
   /** Annotations defined on the class. */
-  abstract ImmutableList<AnnotationMetadata> annotations();
+  public abstract ImmutableList<AnnotationMetadata> annotations();
 
   /** The AutoAdaptee's {@link Category}. */
-  abstract Category category();
+  public abstract Category category();
 
   /** Contains the complete type metadata for the class. */
-  abstract TypeMetadata type();
+  public abstract TypeMetadata type();
 
   /** The inheritance metadatas for the types that this one inherits from. */
-  abstract ImmutableList<InheritanceMetadata> inheritances();
+  public abstract ImmutableList<InheritanceMetadata> inheritances();
 
-  abstract ImmutableSet<ConstructorMetadata> constructors();
+  public abstract ImmutableSet<ConstructorMetadata> constructors();
 
   /** Methods that are declared in this type. */
-  abstract ImmutableList<MethodMetadata> methods();
+  public abstract ImmutableList<MethodMetadata> methods();
 
   @Override
-  public Set<TypeMetadata> getImports() {
+  public Set<TypeMetadata> getAllTypes() {
     ImmutableSet.Builder<TypeMetadata> imports = ImmutableSet.builder();
-    imports.addAll(type().getImports());
+    imports.addAll(type().getAllTypes());
     for (InheritanceMetadata inheritance : inheritances()) {
-      imports.addAll(inheritance.getImports());
+      imports.addAll(inheritance.getAllTypes());
     }
     for (ConstructorMetadata constructor : constructors()) {
-      imports.addAll(constructor.getImports());
+      imports.addAll(constructor.getAllTypes());
     }
     for (MethodMetadata method : methods()) {
-      imports.addAll(method.getImports());
+      imports.addAll(method.getAllTypes());
     }
     return imports.build();
   }
@@ -111,7 +111,7 @@ abstract class ClassMetadata implements GeneratesImports, GeneratesMethods {
     return allMethods;
   }
 
-  String fullyQualifiedPathName() {
+  public String fullyQualifiedPathName() {
     return type().nameBuilder()
         .addPackagePrefix()
         .addNestingPrefix()
@@ -124,7 +124,7 @@ abstract class ClassMetadata implements GeneratesImports, GeneratesMethods {
     return fullyQualifiedPathName();
   }
 
-  static ClassMetadata fromElement(Element element) {
+  public static ClassMetadata fromElement(Element element) {
     Builder metadata = builder()
         .setCategory(Category.forKind(element.getKind()))
         .setType(TypeMetadata.fromElement(element));

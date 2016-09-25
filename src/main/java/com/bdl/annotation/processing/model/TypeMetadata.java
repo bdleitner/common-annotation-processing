@@ -1,14 +1,12 @@
 package com.bdl.annotation.processing.model;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.lang.reflect.ParameterizedType;
@@ -16,6 +14,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -36,29 +35,29 @@ import javax.lang.model.type.WildcardType;
  * @author Ben Leitner
  */
 @AutoValue
-abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata> {
+public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata> {
 
-  static final TypeMetadata VOID = builder()
+  public static final TypeMetadata VOID = builder()
       .setName("void")
       .build();
-  static final TypeMetadata INT = builder()
+  public static final TypeMetadata INT = builder()
       .setName("int")
       .build();
-  static final TypeMetadata LONG = builder()
+  public static final TypeMetadata LONG = builder()
       .setName("long")
       .build();
-  static final TypeMetadata BOOLEAN = builder()
+  public static final TypeMetadata BOOLEAN = builder()
       .setName("boolean")
       .build();
-  static final TypeMetadata STRING = builder()
+  public static final TypeMetadata STRING = builder()
       .setPackageName("java.lang")
       .setName("String")
       .build();
-  static final TypeMetadata OBJECT = builder()
+  public static final TypeMetadata OBJECT = builder()
       .setPackageName("java.lang")
       .setName("Object")
       .build();
-  static final TypeMetadata CLASS = builder()
+  public static final TypeMetadata CLASS = builder()
       .setPackageName("java.lang")
       .setName("Class")
       .addParam(simpleTypeParam("?"))
@@ -66,22 +65,22 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
   private ImmutableSet<TypeMetadata> imports;
 
   /** The package in which the type lives. */
-  abstract String packageName();
+  public abstract String packageName();
 
   /** If {@code true}, the type is a Generic type parameter. */
-  abstract boolean isTypeParameter();
+  public abstract boolean isTypeParameter();
 
   /** The names of any outer classes enclosing this type, from innermost to outermost. */
-  abstract ImmutableList<String> outerClassNames();
+  public abstract ImmutableList<String> outerClassNames();
 
   /** The name of the type. */
-  abstract String name();
+  public abstract String name();
 
   /** Type parameters for a generic type. */
-  abstract ImmutableList<TypeMetadata> params();
+  public abstract ImmutableList<TypeMetadata> params();
 
   /** Bounds for a type parameter type. */
-  abstract ImmutableList<TypeMetadata> bounds();
+  public abstract ImmutableList<TypeMetadata> bounds();
 
   @Override
   public int compareTo(TypeMetadata that) {
@@ -93,12 +92,12 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
   }
 
   /** Get a builder to construct a type name. */
-  TypeNameBuilder nameBuilder() {
+  public TypeNameBuilder nameBuilder() {
     return new TypeNameBuilder();
   }
 
   @Override
-  public Set<TypeMetadata> getImports() {
+  public Set<TypeMetadata> getAllTypes() {
     if (imports == null) {
       ImmutableSet.Builder<TypeMetadata> allImports = ImmutableSet.builder();
       if (!isTypeParameter()) {
@@ -106,10 +105,10 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
         allImports.add(rawType());
       }
       for (TypeMetadata param : params()) {
-        allImports.addAll(param.getImports());
+        allImports.addAll(param.getAllTypes());
       }
       for (TypeMetadata bound : bounds()) {
-        allImports.addAll(bound.getImports());
+        allImports.addAll(bound.getAllTypes());
       }
 
       imports = allImports.build();
@@ -117,7 +116,7 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
     return imports;
   }
 
-  String fullDescription() {
+  public String fullDescription() {
     return nameBuilder()
         .addPackagePrefix()
         .addNestingPrefix()
@@ -127,7 +126,7 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
         .toString();
   }
 
-  Kind kind() {
+  public Kind kind() {
     switch (nameBuilder().addPackagePrefix().addNestingPrefix().addSimpleName().toString()) {
       case "java.lang.Integer":
       case "java.lang.Long":
@@ -171,12 +170,7 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
       Preconditions.checkArgument(newParams.size() == params().size(),
           "Cannot convert %s to using type params <%s>, the number of params does not match.",
           fullDescription(),
-          Joiner.on(", ").join(Iterables.transform(newParams, new Function<TypeMetadata, String>() {
-            @Override
-            public String apply(TypeMetadata input) {
-              return input.name();
-            }
-          })));
+          newParams.stream().map(TypeMetadata::name).collect(Collectors.joining(", ")));
       ImmutableMap.Builder<String, String> paramNameMapBuilder = ImmutableMap.builder();
       int i = 0;
       for (TypeMetadata param : params()) {
@@ -188,12 +182,7 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
       Preconditions.checkArgument(newParams.size() == 1,
           "Cannot convert %s to type params <%s>, exactly 1 type parameter is required.",
           fullDescription(),
-          Joiner.on(", ").join(Iterables.transform(newParams, new Function<TypeMetadata, String>() {
-            @Override
-            public String apply(TypeMetadata input) {
-              return input.name();
-            }
-          })));
+          newParams.stream().map(TypeMetadata::name).collect(Collectors.joining(", ")));
       return convertTypeParams(ImmutableMap.of(name(), newParams.get(0).name()));
     }
   }
@@ -228,12 +217,6 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
         .setName(name());
     builder.outerClassNamesBuilder().addAll(outerClassNames());
     return builder.build();
-  }
-
-  String getOutermostName() {
-    return outerClassNames().isEmpty()
-        ? name()
-        : outerClassNames().get(outerClassNames().size() - 1);
   }
 
   @Override
@@ -311,19 +294,19 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
     return builder.build();
   }
 
-  static TypeMetadata fromType(TypeMirror type) {
+  public static TypeMetadata fromType(TypeMirror type) {
     return fromType(type, true);
   }
 
-  static TypeMetadata fromElement(Element element) {
+  public static TypeMetadata fromElement(Element element) {
     return fromType(element.asType(), true);
   }
 
-  static TypeMetadata fromObject(Object object) {
+  public static TypeMetadata fromObject(Object object) {
     return from(object.getClass(), true);
   }
 
-  static TypeMetadata from(Type type) {
+  public static TypeMetadata from(Type type) {
     return from(type, true);
   }
 
@@ -369,7 +352,7 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
     return metadata.build();
   }
 
-  static TypeMetadata simpleTypeParam(String paramName) {
+  public static TypeMetadata simpleTypeParam(String paramName) {
     return builder().setIsTypeParameter(true).setName(paramName).build();
   }
 
@@ -418,11 +401,13 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
       TypeMetadata metadata = autoBuild();
       if (metadata.isTypeParameter()) {
         Preconditions.checkState(metadata.params().isEmpty(),
-            "Type parameters given for type-parameter: %s", metadata.nameBuilder().addSimpleName().addBounds().toString());
+            "Type parameters given for type-parameter: %s",
+            metadata.nameBuilder().addSimpleName().addBounds().toString());
         Preconditions.checkState(metadata.outerClassNames().isEmpty(),
             "Nesting classes given type-parameter: %s", metadata.nameBuilder().addSimpleName().addBounds().toString());
         Preconditions.checkState(metadata.packageName().isEmpty(),
-            "Nonempty package given for type-parameter: %s", metadata.nameBuilder().addSimpleName().addBounds().toString());
+            "Nonempty package given for type-parameter: %s",
+            metadata.nameBuilder().addSimpleName().addBounds().toString());
       } else {
         Preconditions.checkState(metadata.bounds().isEmpty(),
             "Bounds given for non-type-parameter: %s", metadata.fullDescription());
@@ -432,107 +417,91 @@ abstract class TypeMetadata implements GeneratesImports, Comparable<TypeMetadata
   }
 
   // TODO: Incorporate shorter names if we have imports available.
-  class TypeNameBuilder {
+  public class TypeNameBuilder {
     private final StringBuilder nameBuilder;
 
     TypeNameBuilder() {
       nameBuilder = new StringBuilder();
     }
 
-    TypeNameBuilder addOutermostClassName() {
+    public TypeNameBuilder addOutermostClassName() {
       if (!outerClassNames().isEmpty()) {
         nameBuilder.append(outerClassNames().get(outerClassNames().size() - 1));
       }
       return this;
     }
 
-    TypeNameBuilder addNestingPrefix(String delimiter) {
+    public TypeNameBuilder addNestingPrefix(String delimiter) {
       if (!outerClassNames().isEmpty()) {
         nameBuilder.append(Joiner.on(delimiter).join(Lists.reverse(outerClassNames()))).append(delimiter);
       }
       return this;
     }
 
-    TypeNameBuilder addPackagePrefix() {
+    public TypeNameBuilder addPackagePrefix() {
       if (!packageName().isEmpty()) {
         nameBuilder.append(packageName()).append(".");
       }
       return this;
     }
 
-    TypeNameBuilder addNestingPrefix() {
+    public TypeNameBuilder addNestingPrefix() {
       return addNestingPrefix(".");
     }
 
-    TypeNameBuilder addSimpleName() {
+    public TypeNameBuilder addSimpleName() {
       nameBuilder.append(name());
       return this;
     }
 
-    private TypeNameBuilder addParams(Function<TypeMetadata, String> paramsToStrings) {
+    private TypeNameBuilder addParams(java.util.function.Function<TypeMetadata, String> paramsToStrings) {
       if (!params().isEmpty()) {
         nameBuilder
             .append("<")
-            .append(Joiner.on(", ").join(Iterables.transform(params(), paramsToStrings)))
+            .append(params().stream().map(paramsToStrings).collect(Collectors.joining(", ")))
             .append(">");
       }
       return this;
     }
 
-    TypeNameBuilder addSimpleParams() {
-      return addParams(new Function<TypeMetadata, String>() {
-        @Override
-        public String apply(TypeMetadata param) {
-          return param.nameBuilder()
-              .addPackagePrefix()
-              .addNestingPrefix()
-              .addSimpleName()
-              .addSimpleParams()
-              .toString();
-        }
-      });
+    public TypeNameBuilder addSimpleParams() {
+      return addParams(param -> param.nameBuilder()
+          .addPackagePrefix()
+          .addNestingPrefix()
+          .addSimpleName()
+          .addSimpleParams()
+          .toString());
     }
 
-    TypeNameBuilder addFullParams() {
-      return addParams(new Function<TypeMetadata, String>() {
-        @Override
-        public String apply(TypeMetadata param) {
-          return param.nameBuilder()
-              .addPackagePrefix()
-              .addNestingPrefix()
-              .addSimpleName()
-              .addSimpleParams() // Note, there cannot be both simple params and bounds.
-              .addBounds() // as one only applies to type params and one to non-type-params.
-              .toString();
-        }
-      });
+    public TypeNameBuilder addFullParams() {
+      return addParams(param -> param.nameBuilder()
+          .addPackagePrefix()
+          .addNestingPrefix()
+          .addSimpleName()
+          .addSimpleParams() // Note, there cannot be both simple params and bounds.
+          .addBounds() // as one only applies to type params and one to non-type-params.
+          .toString());
     }
 
-    TypeNameBuilder addBounds() {
+    public TypeNameBuilder addBounds() {
       if (!bounds().isEmpty()) {
         nameBuilder
             .append(" extends ")
-            .append(Joiner.on(" & ").join(
-                Iterables.transform(
-                    bounds(),
-                    new Function<TypeMetadata, String>() {
-                      @Override
-                      public String apply(TypeMetadata bound) {
-                        return bound.nameBuilder()
-                            .addPackagePrefix()
-                            .addNestingPrefix()
-                            .addSimpleName()
-                            .addSimpleParams() // Note, there cannot be both simple params and bounds.
-                            .addBounds() // as one only applies to type params and one to non-type-params.
-                            .toString();
-                      }
-                    }
-                )));
+            .append(
+                bounds().stream()
+                    .map((bound) -> bound.nameBuilder()
+                        .addPackagePrefix()
+                        .addNestingPrefix()
+                        .addSimpleName()
+                        .addSimpleParams() // Note, there cannot be both simple params and bounds.
+                        .addBounds() // as one only applies to type params and one to non-type-params.
+                        .toString())
+                    .collect(Collectors.joining(", ")));
       }
       return this;
     }
 
-    TypeNameBuilder append(String s) {
+    public TypeNameBuilder append(String s) {
       nameBuilder.append(s);
       return this;
     }
