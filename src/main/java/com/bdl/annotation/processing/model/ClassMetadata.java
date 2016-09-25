@@ -153,17 +153,17 @@ public abstract class ClassMetadata implements UsesTypes {
     return metadata.build();
   }
 
-  static Builder builder() {
+  public static Builder builder() {
     return new AutoValue_ClassMetadata.Builder();
   }
 
   @AutoValue.Builder
-  static abstract class Builder {
+  public static abstract class Builder {
     abstract ImmutableList.Builder<AnnotationMetadata> annotationsBuilder();
 
-    abstract Builder setCategory(Category category);
+    public abstract Builder setCategory(Category category);
 
-    abstract Builder setType(TypeMetadata type);
+    public abstract Builder setType(TypeMetadata type);
 
     abstract ImmutableList.Builder<InheritanceMetadata> inheritancesBuilder();
 
@@ -171,26 +171,26 @@ public abstract class ClassMetadata implements UsesTypes {
 
     abstract ImmutableList.Builder<MethodMetadata> methodsBuilder();
 
-    Builder addInheritance(InheritanceMetadata inheritance) {
+    public Builder addInheritance(InheritanceMetadata inheritance) {
       inheritancesBuilder().add(inheritance);
       return this;
     }
 
-    Builder addAnnotation(AnnotationMetadata annotation) {
+    public Builder addAnnotation(AnnotationMetadata annotation) {
       annotationsBuilder().add(annotation);
       return this;
     }
 
-    Builder addConstructor(ConstructorMetadata constructor) {
+    public Builder addConstructor(ConstructorMetadata constructor) {
       constructorsBuilder().add(constructor);
       return this;
     }
 
-    Builder addMethod(MethodMetadata method) {
+    public Builder addMethod(MethodMetadata method) {
       methodsBuilder().add(method);
       return this;
     }
 
-    abstract ClassMetadata build();
+    public abstract ClassMetadata build();
   }
 }

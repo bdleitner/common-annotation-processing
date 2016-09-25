@@ -70,21 +70,21 @@ public abstract class ConstructorMetadata implements Comparable<ConstructorMetad
     return constructor.build();
   }
 
-  static Builder builder() {
+  public static Builder builder() {
     return new AutoValue_ConstructorMetadata.Builder();
   }
 
   @AutoValue.Builder
-  abstract static class Builder {
-    abstract Builder visibility(Visibility visibility);
+  public abstract static class Builder {
+    public abstract Builder visibility(Visibility visibility);
 
     abstract ImmutableList.Builder<ParameterMetadata> parametersBuilder();
 
-    Builder addParameter(ParameterMetadata parameter) {
+    public Builder addParameter(ParameterMetadata parameter) {
       parametersBuilder().add(parameter);
       return this;
     }
 
-    abstract ConstructorMetadata build();
+    public abstract ConstructorMetadata build();
   }
 }

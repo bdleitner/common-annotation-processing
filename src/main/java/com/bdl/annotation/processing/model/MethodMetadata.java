@@ -132,11 +132,11 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
         Joiner.on(", ").join(parameters()));
   }
 
-  MethodMetadata asAbstract() {
+  public MethodMetadata asAbstract() {
     return toBuilder().setIsAbstract(true).build();
   }
 
-  MethodMetadata asConcrete() {
+  public MethodMetadata asConcrete() {
     return toBuilder().setIsAbstract(false).build();
   }
 
@@ -147,7 +147,7 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
 
   abstract Builder toBuilder();
 
-  static Builder builder() {
+  public static Builder builder() {
     return new AutoValue_MethodMetadata.Builder()
         .setIsAbstract(false);
   }
@@ -180,39 +180,39 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
   }
 
   @AutoValue.Builder
-  static abstract class Builder {
+  public static abstract class Builder {
     abstract ImmutableList.Builder<AnnotationMetadata> annotationsBuilder();
 
-    abstract Builder setVisibility(Visibility visibility);
+    public abstract Builder setVisibility(Visibility visibility);
 
     abstract ImmutableList.Builder<TypeMetadata> typeParametersBuilder();
 
-    abstract Builder setIsAbstract(boolean isAbstract);
+    public abstract Builder setIsAbstract(boolean isAbstract);
 
-    abstract Builder setName(String name);
+    public abstract Builder setName(String name);
 
-    abstract Builder setType(TypeMetadata Type);
+    public abstract Builder setType(TypeMetadata Type);
 
     abstract ImmutableList.Builder<ParameterMetadata> parametersBuilder();
 
-    Builder addAnnotation(AnnotationMetadata metadata) {
+    public Builder addAnnotation(AnnotationMetadata metadata) {
       annotationsBuilder().add(metadata);
       return this;
     }
 
-    Builder addTypeParameter(TypeMetadata metadata) {
+    public Builder addTypeParameter(TypeMetadata metadata) {
       Preconditions.checkArgument(metadata.isTypeParameter(),
           "Cannot add %s as a type parameter.", metadata);
       typeParametersBuilder().add(metadata);
       return this;
     }
 
-    Builder addParameter(ParameterMetadata parameter) {
+    public Builder addParameter(ParameterMetadata parameter) {
       parametersBuilder().add(parameter);
       return this;
     }
 
-    abstract MethodMetadata build();
+    public abstract MethodMetadata build();
   }
 
   private static class NameIterator implements Iterator<String> {

@@ -356,7 +356,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     return builder().setIsTypeParameter(true).setName(paramName).build();
   }
 
-  static Builder builder() {
+  public static Builder builder() {
     return new AutoValue_TypeMetadata.Builder()
         .setPackageName("")
         .setIsTypeParameter(false);
@@ -365,31 +365,31 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
   abstract Builder toBuilder();
 
   @AutoValue.Builder
-  abstract static class Builder {
-    abstract Builder setPackageName(String packageName);
+  public abstract static class Builder {
+    public abstract Builder setPackageName(String packageName);
 
-    abstract Builder setIsTypeParameter(boolean isTypeParameter);
+    public abstract Builder setIsTypeParameter(boolean isTypeParameter);
 
     abstract ImmutableList.Builder<String> outerClassNamesBuilder();
 
-    abstract Builder setName(String name);
+    public abstract Builder setName(String name);
 
     abstract ImmutableList.Builder<TypeMetadata> paramsBuilder();
 
     abstract ImmutableList.Builder<TypeMetadata> boundsBuilder();
 
-    Builder addOuterClass(String className) {
+    public Builder addOuterClass(String className) {
       setIsTypeParameter(false);
       outerClassNamesBuilder().add(className);
       return this;
     }
 
-    Builder addParam(TypeMetadata metadata) {
+    public Builder addParam(TypeMetadata metadata) {
       paramsBuilder().add(metadata);
       return this;
     }
 
-    Builder addBound(TypeMetadata metadata) {
+    public Builder addBound(TypeMetadata metadata) {
       setIsTypeParameter(true);
       boundsBuilder().add(metadata);
       return this;
@@ -397,7 +397,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
 
     abstract TypeMetadata autoBuild();
 
-    TypeMetadata build() {
+    public TypeMetadata build() {
       TypeMetadata metadata = autoBuild();
       if (metadata.isTypeParameter()) {
         Preconditions.checkState(metadata.params().isEmpty(),
@@ -496,7 +496,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
                         .addSimpleParams() // Note, there cannot be both simple params and bounds.
                         .addBounds() // as one only applies to type params and one to non-type-params.
                         .toString())
-                    .collect(Collectors.joining(", ")));
+                    .collect(Collectors.joining(" & ")));
       }
       return this;
     }

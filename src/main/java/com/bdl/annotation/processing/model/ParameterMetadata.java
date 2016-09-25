@@ -35,7 +35,7 @@ public abstract class ParameterMetadata implements UsesTypes {
     return type().getAllTypes();
   }
 
-  static ParameterMetadata of(TypeMetadata type, String name) {
+  public static ParameterMetadata of(TypeMetadata type, String name) {
     ParameterMetadata metadata = new AutoValue_ParameterMetadata(type);
     metadata.name = name;
     return metadata;
