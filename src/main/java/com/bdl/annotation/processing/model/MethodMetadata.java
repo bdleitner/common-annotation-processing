@@ -117,7 +117,7 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
             .collect(Collectors.joining(", ")));
   }
 
-  String fullDescription() {
+  public String fullDescription() {
     return String.format("%s%s%s%s %s(%s)",
         visibility().prefix(),
         isAbstract() ? "abstract " : "",
