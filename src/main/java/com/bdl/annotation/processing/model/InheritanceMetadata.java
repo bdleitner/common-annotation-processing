@@ -19,7 +19,7 @@ import javax.lang.model.type.TypeMirror;
  * @author Ben Leitner
  */
 @AutoValue
-public abstract class InheritanceMetadata implements GeneratesMethods, UsesTypes {
+public abstract class InheritanceMetadata implements UsesTypes {
 
   private ImmutableList<MethodMetadata> allMethods;
 
@@ -33,8 +33,7 @@ public abstract class InheritanceMetadata implements GeneratesMethods, UsesTypes
     return classMetadata().getAllTypes();
   }
 
-  @Override
-  public ImmutableList<MethodMetadata> getAllMethods() {
+  ImmutableList<MethodMetadata> getAllMethods() {
     if (allMethods == null) {
       final Map<String, String> paramNamesMap = getParamNamesMap();
       allMethods = ImmutableList.copyOf(

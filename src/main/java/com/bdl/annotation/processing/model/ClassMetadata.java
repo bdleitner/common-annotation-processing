@@ -22,7 +22,7 @@ import javax.lang.model.type.TypeMirror;
  * @author Ben Leitner
  */
 @AutoValue
-public abstract class ClassMetadata implements UsesTypes, GeneratesMethods {
+public abstract class ClassMetadata implements UsesTypes {
 
   /** Enumeration of the possible types to AutoAdapt: Class and Interface. */
   public enum Category {
@@ -77,7 +77,6 @@ public abstract class ClassMetadata implements UsesTypes, GeneratesMethods {
   }
 
   /** Methods declared in this type or in any supertype / interface. */
-  @Override
   public ImmutableList<MethodMetadata> getAllMethods() {
     if (allMethods == null) {
       Stream<MethodMetadata> methodStream = Stream.empty();
