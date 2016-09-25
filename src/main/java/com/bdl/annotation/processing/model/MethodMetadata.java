@@ -132,6 +132,14 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
         Joiner.on(", ").join(parameters()));
   }
 
+  MethodMetadata asAbstract() {
+    return toBuilder().setIsAbstract(true).build();
+  }
+
+  MethodMetadata asConcrete() {
+    return toBuilder().setIsAbstract(false).build();
+  }
+
   @Override
   public String toString() {
     return fullDescription();

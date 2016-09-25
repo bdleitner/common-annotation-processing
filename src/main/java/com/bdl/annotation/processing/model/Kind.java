@@ -5,7 +5,7 @@ package com.bdl.annotation.processing.model;
  *
  * @author Ben Leitner
  */
-enum Kind {
+public enum Kind {
   /** primitive or boxed numeric types. */
   NUMERIC,
   /** primitive or boxed booleans. */
