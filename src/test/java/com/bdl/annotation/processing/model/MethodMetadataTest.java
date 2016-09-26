@@ -165,7 +165,7 @@ public class MethodMetadataTest {
         .build();
     assertThat(method).isEqualTo(expected);
 
-    assertThat(method.fullDescription())
+    assertThat(method.fullDescription(Imports.empty()))
         .isEqualTo("public abstract <A, B extends java.util.List<A>>"
             + " com.google.common.collect.ImmutableList<A> filter(B arg0, com.google.common.base.Predicate<A> arg1)");
   }

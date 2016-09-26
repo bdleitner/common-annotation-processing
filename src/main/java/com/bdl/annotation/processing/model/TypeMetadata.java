@@ -1,13 +1,11 @@
 package com.bdl.annotation.processing.model;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -91,9 +89,50 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
         .result();
   }
 
-  /** Get a builder to construct a type name. */
-  public TypeNameBuilder nameBuilder() {
-    return new TypeNameBuilder();
+  public String packagePrefix() {
+    return packageName().isEmpty() ? "" : packageName() + ".";
+  }
+
+  public String nestingPrefix() {
+    return nestingPrefix(".");
+  }
+
+  public String nestingPrefix(String delimiter) {
+    String prefix = outerClassNames().reverse().stream().collect(Collectors.joining(delimiter));
+    return prefix.isEmpty() ? "" : prefix + delimiter;
+  }
+
+  public String reference(Imports imports) {
+    return reference(imports, false);
+  }
+
+  public String reference(Imports imports, boolean withBounds) {
+    StringBuilder s = new StringBuilder();
+    Imports.ReferenceType referenceType = imports.reference(this);
+    switch (referenceType) {
+      case FULLY_QUALIFIED_PATH_NAME:
+        s.append(packagePrefix());
+        // fallthrough
+      case NESTED_NAME:
+        s.append(nestingPrefix());
+        // fallthrough
+      case NAME_ONLY:
+        s.append(name());
+    }
+    if (!params().isEmpty()) {
+      s.append("<");
+      s.append(params().stream()
+          .map((type) -> type.reference(imports, withBounds))
+          .collect(Collectors.joining(", ")));
+      s.append(">");
+    }
+    if (withBounds && !bounds().isEmpty()) {
+      s.append(" extends ");
+      s.append(bounds().stream()
+          .map((type) -> type.reference(imports, false)) // do not recurse on bounds
+          .collect(Collectors.joining(" & ")));
+    }
+    return s.toString();
   }
 
   @Override
@@ -116,18 +155,8 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     return imports;
   }
 
-  public String fullDescription() {
-    return nameBuilder()
-        .addPackagePrefix()
-        .addNestingPrefix()
-        .addSimpleName()
-        .addFullParams()
-        .addBounds()
-        .toString();
-  }
-
   public Kind kind() {
-    switch (nameBuilder().addPackagePrefix().addNestingPrefix().addSimpleName().toString()) {
+    switch (packagePrefix() + nestingPrefix() + name()) {
       case "java.lang.Integer":
       case "java.lang.Long":
       case "java.lang.Double":
@@ -169,7 +198,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     if (!isTypeParameter()) {
       Preconditions.checkArgument(newParams.size() == params().size(),
           "Cannot convert %s to using type params <%s>, the number of params does not match.",
-          fullDescription(),
+          reference(Imports.empty()),
           newParams.stream().map(TypeMetadata::name).collect(Collectors.joining(", ")));
       ImmutableMap.Builder<String, String> paramNameMapBuilder = ImmutableMap.builder();
       int i = 0;
@@ -181,7 +210,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     } else {
       Preconditions.checkArgument(newParams.size() == 1,
           "Cannot convert %s to type params <%s>, exactly 1 type parameter is required.",
-          fullDescription(),
+          reference(Imports.empty()),
           newParams.stream().map(TypeMetadata::name).collect(Collectors.joining(", ")));
       return convertTypeParams(ImmutableMap.of(name(), newParams.get(0).name()));
     }
@@ -212,6 +241,9 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
 
   TypeMetadata rawType() {
     Preconditions.checkState(!isTypeParameter(), "Cannot take the raw type of type parameter %s", this);
+    if (params().isEmpty()) {
+      return this;
+    }
     Builder builder = builder()
         .setPackageName(packageName())
         .setName(name());
@@ -221,7 +253,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
 
   @Override
   public String toString() {
-    return fullDescription();
+    return reference(Imports.empty());
   }
 
   private static String getSimpleName(TypeMirror type) {
@@ -402,113 +434,18 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
       if (metadata.isTypeParameter()) {
         Preconditions.checkState(metadata.params().isEmpty(),
             "Type parameters given for type-parameter: %s",
-            metadata.nameBuilder().addSimpleName().addBounds().toString());
+            metadata.reference(Imports.empty()));
         Preconditions.checkState(metadata.outerClassNames().isEmpty(),
-            "Nesting classes given type-parameter: %s", metadata.nameBuilder().addSimpleName().addBounds().toString());
+            "Nesting classes given type-parameter: %s",
+            metadata.reference(Imports.empty()));
         Preconditions.checkState(metadata.packageName().isEmpty(),
             "Nonempty package given for type-parameter: %s",
-            metadata.nameBuilder().addSimpleName().addBounds().toString());
+            metadata.reference(Imports.empty()));
       } else {
         Preconditions.checkState(metadata.bounds().isEmpty(),
-            "Bounds given for non-type-parameter: %s", metadata.fullDescription());
+            "Bounds given for non-type-parameter: %s", metadata.reference(Imports.empty()));
       }
       return metadata;
-    }
-  }
-
-  // TODO: Incorporate shorter names if we have imports available.
-  public class TypeNameBuilder {
-    private final StringBuilder nameBuilder;
-
-    TypeNameBuilder() {
-      nameBuilder = new StringBuilder();
-    }
-
-    public TypeNameBuilder addOutermostClassName() {
-      if (!outerClassNames().isEmpty()) {
-        nameBuilder.append(outerClassNames().get(outerClassNames().size() - 1));
-      }
-      return this;
-    }
-
-    public TypeNameBuilder addNestingPrefix(String delimiter) {
-      if (!outerClassNames().isEmpty()) {
-        nameBuilder.append(Joiner.on(delimiter).join(Lists.reverse(outerClassNames()))).append(delimiter);
-      }
-      return this;
-    }
-
-    public TypeNameBuilder addPackagePrefix() {
-      if (!packageName().isEmpty()) {
-        nameBuilder.append(packageName()).append(".");
-      }
-      return this;
-    }
-
-    public TypeNameBuilder addNestingPrefix() {
-      return addNestingPrefix(".");
-    }
-
-    public TypeNameBuilder addSimpleName() {
-      nameBuilder.append(name());
-      return this;
-    }
-
-    private TypeNameBuilder addParams(java.util.function.Function<TypeMetadata, String> paramsToStrings) {
-      if (!params().isEmpty()) {
-        nameBuilder
-            .append("<")
-            .append(params().stream().map(paramsToStrings).collect(Collectors.joining(", ")))
-            .append(">");
-      }
-      return this;
-    }
-
-    public TypeNameBuilder addSimpleParams() {
-      return addParams(param -> param.nameBuilder()
-          .addPackagePrefix()
-          .addNestingPrefix()
-          .addSimpleName()
-          .addSimpleParams()
-          .toString());
-    }
-
-    public TypeNameBuilder addFullParams() {
-      return addParams(param -> param.nameBuilder()
-          .addPackagePrefix()
-          .addNestingPrefix()
-          .addSimpleName()
-          .addSimpleParams() // Note, there cannot be both simple params and bounds.
-          .addBounds() // as one only applies to type params and one to non-type-params.
-          .toString());
-    }
-
-    public TypeNameBuilder addBounds() {
-      if (!bounds().isEmpty()) {
-        nameBuilder
-            .append(" extends ")
-            .append(
-                bounds().stream()
-                    .map((bound) -> bound.nameBuilder()
-                        .addPackagePrefix()
-                        .addNestingPrefix()
-                        .addSimpleName()
-                        .addSimpleParams() // Note, there cannot be both simple params and bounds.
-                        .addBounds() // as one only applies to type params and one to non-type-params.
-                        .toString())
-                    .collect(Collectors.joining(" & ")));
-      }
-      return this;
-    }
-
-    public TypeNameBuilder append(String s) {
-      nameBuilder.append(s);
-      return this;
-    }
-
-    @Override
-    public String toString() {
-      return nameBuilder.toString();
     }
   }
 }

@@ -18,28 +18,37 @@ import java.util.Map;
  *
  * @author Ben Leitner
  */
-class Imports {
+public class Imports {
 
-  enum ReferenceType {
+  public enum ReferenceType {
     NAME_ONLY,
     NESTED_NAME,
     FULLY_QUALIFIED_PATH_NAME
   }
 
+  private final String packageName;
   private final Map<TypeMetadata, ReferenceType> referenceMap;
 
-  private Imports(Map<TypeMetadata, ReferenceType> referenceMap) {
+  private Imports(String packageName, Map<TypeMetadata, ReferenceType> referenceMap) {
+    this.packageName = packageName;
     this.referenceMap = referenceMap;
   }
 
-  static Imports create(Iterable<TypeMetadata> imports) {
+  public static Imports create(String packageName, Iterable<TypeMetadata> imports) {
     Multimap<String, TypeMetadata> namesToTypes = namesToTypes(imports);
-    return new Imports(createReferenceMap(namesToTypes));
+    return new Imports(packageName, createReferenceMap(namesToTypes));
+  }
+
+  public static Imports empty() {
+    return create(null, ImmutableList.of());
   }
 
   private static Multimap<String, TypeMetadata> namesToTypes(Iterable<TypeMetadata> imports) {
     ImmutableMultimap.Builder<String, TypeMetadata> multimap = ImmutableMultimap.builder();
     for (TypeMetadata type : imports) {
+      if (neverNeedsImport(type)) {
+        continue;
+      }
       multimap.put(type.name(), type);
     }
     return multimap.build();
@@ -64,23 +73,30 @@ class Imports {
     return referenceMap.build();
   }
 
-  List<String> getImports() {
+  private static boolean neverNeedsImport(TypeMetadata type) {
+    return type.isTypeParameter()
+        || type.packageName().equals("java.lang")
+        || (type.packageName().isEmpty()
+        && type.nestingPrefix().isEmpty()
+        && type.name().equals(type.name().toLowerCase()));
+  }
+
+  public List<String> getImports() {
     List<String> imports = Lists.newArrayList();
     for (Map.Entry<TypeMetadata, ReferenceType> entry : referenceMap.entrySet()) {
       TypeMetadata type = entry.getKey();
+      if (type.packageName().equals(packageName)) {
+        continue;
+      }
       switch (entry.getValue()) {
         case FULLY_QUALIFIED_PATH_NAME:
           // No import, FQPN must be used.
           break;
         case NESTED_NAME:
-          imports.add(type.nameBuilder().addPackagePrefix().addOutermostClassName().toString());
+          imports.add(packagePrefix(type) + type.outerClassNames().get(type.outerClassNames().size() - 1));
           break;
         case NAME_ONLY:
-          imports.add(type.nameBuilder()
-              .addPackagePrefix()
-              .addNestingPrefix()
-              .addSimpleName()
-              .toString());
+          imports.add(packagePrefix(type) + type.nestingPrefix() + type.name());
           break;
       }
     }
@@ -88,11 +104,22 @@ class Imports {
     return ImmutableList.copyOf(imports);
   }
 
-  ReferenceType reference(TypeMetadata type) {
-    if (type.packageName().equals("java.lang")
-        || type.packageName().isEmpty()) {
+  private String packagePrefix(TypeMetadata type) {
+    return type.packageName().isEmpty()
+        ? ""
+        : type.packageName() + ".";
+  }
+
+  public ReferenceType reference(TypeMetadata type) {
+    if (neverNeedsImport(type)) {
       return ReferenceType.NAME_ONLY;
     }
-    return referenceMap.get(type.rawType());
+    if (type.packageName().equals(packageName)) {
+      return ReferenceType.NAME_ONLY;
+    }
+    ReferenceType referenceType = referenceMap.get(type.rawType());
+    return referenceType == null
+        ? ReferenceType.FULLY_QUALIFIED_PATH_NAME
+        : referenceType;
   }
 }

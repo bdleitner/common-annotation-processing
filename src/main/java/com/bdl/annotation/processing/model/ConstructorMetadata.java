@@ -1,13 +1,13 @@
 package com.bdl.annotation.processing.model;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -21,6 +21,8 @@ import javax.lang.model.element.VariableElement;
  */
 @AutoValue
 public abstract class ConstructorMetadata implements Comparable<ConstructorMetadata>, UsesTypes {
+
+  public abstract TypeMetadata type();
 
   public abstract Visibility visibility();
 
@@ -43,13 +45,18 @@ public abstract class ConstructorMetadata implements Comparable<ConstructorMetad
         .result();
   }
 
-  public String toString(String className) {
-    return String.format("%s%s(%s)", visibility().prefix(), className, Joiner.on(", ").join(parameters()));
-  }
-
   @Override
   public String toString() {
-    return toString("Constructor");
+    return toString(Imports.empty());
+  }
+
+  public String toString(Imports imports) {
+    return String.format("%s%s(%s)",
+        visibility().prefix(),
+        type().name(),
+        parameters().stream()
+            .map((param) -> param.toString(imports))
+            .collect(Collectors.joining(", ")));
   }
 
   public static ConstructorMetadata fromConstructor(Element element) {
@@ -58,7 +65,8 @@ public abstract class ConstructorMetadata implements Comparable<ConstructorMetad
 
     ExecutableElement executable = (ExecutableElement) element;
     Builder constructor = builder()
-        .visibility(Visibility.forElement(element));
+        .visibility(Visibility.forElement(element))
+        .type(TypeMetadata.fromElement(element.getEnclosingElement()));
 
     for (VariableElement parameter : executable.getParameters()) {
       constructor.addParameter(
@@ -76,6 +84,7 @@ public abstract class ConstructorMetadata implements Comparable<ConstructorMetad
 
   @AutoValue.Builder
   public abstract static class Builder {
+    public abstract Builder type(TypeMetadata type);
     public abstract Builder visibility(Visibility visibility);
 
     abstract ImmutableList.Builder<ParameterMetadata> parametersBuilder();

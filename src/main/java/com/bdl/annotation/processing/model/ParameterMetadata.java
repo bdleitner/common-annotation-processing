@@ -43,13 +43,12 @@ public abstract class ParameterMetadata implements UsesTypes {
 
   @Override
   public String toString() {
+    return toString(Imports.empty());
+  }
+
+  public String toString(Imports imports) {
     return String.format("%s %s",
-        type().nameBuilder()
-            .addPackagePrefix()
-            .addNestingPrefix()
-            .addSimpleName()
-            .addSimpleParams()
-            .toString(),
+        type().reference(imports),
         name());
   }
 }

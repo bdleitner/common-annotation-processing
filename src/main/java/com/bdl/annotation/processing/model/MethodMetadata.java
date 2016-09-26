@@ -3,7 +3,6 @@ package com.bdl.annotation.processing.model;
 import static java.util.Comparator.comparing;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -104,32 +103,26 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
     return imports.build();
   }
 
-  private String typeParametersPrefix() {
+  private String typeParametersPrefix(Imports imports) {
     if (typeParameters().isEmpty()) {
       return "";
     }
     return String.format("<%s> ",
         typeParameters().stream()
-            .map(input -> input.nameBuilder()
-                .addSimpleName()
-                .addBounds()
-                .toString())
+            .map(input -> input.reference(imports, true))
             .collect(Collectors.joining(", ")));
   }
 
-  public String fullDescription() {
+  public String fullDescription(Imports imports) {
     return String.format("%s%s%s%s %s(%s)",
         visibility().prefix(),
         isAbstract() ? "abstract " : "",
-        typeParametersPrefix(),
-        type().nameBuilder()
-            .addPackagePrefix()
-            .addNestingPrefix()
-            .addSimpleName()
-            .addSimpleParams()
-            .toString(),
+        typeParametersPrefix(imports),
+        type().reference(imports),
         name(),
-        Joiner.on(", ").join(parameters()));
+        parameters().stream()
+            .map((param) -> param.toString(imports))
+            .collect(Collectors.joining(", ")));
   }
 
   public MethodMetadata asAbstract() {
@@ -142,7 +135,7 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
 
   @Override
   public String toString() {
-    return fullDescription();
+    return fullDescription(Imports.empty());
   }
 
   abstract Builder toBuilder();

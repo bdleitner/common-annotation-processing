@@ -229,14 +229,17 @@ public class ClassMetadataTest {
   public void testConstructors() {
     assertThat(metadata.constructors()).containsExactly(
         ConstructorMetadata.builder()
+            .type(metadata.type())
             .visibility(Visibility.PRIVATE)
             .addParameter(ParameterMetadata.of(TypeMetadata.STRING, "blargh"))
             .build(),
         ConstructorMetadata.builder()
+            .type(metadata.type())
             .visibility(Visibility.PACKAGE_LOCAL)
             .addParameter(ParameterMetadata.of(TypeMetadata.INT, "foo"))
             .build(),
         ConstructorMetadata.builder()
+            .type(metadata.type())
             .visibility(Visibility.PUBLIC)
             .addParameter(ParameterMetadata.of(TypeMetadata.BOOLEAN, "foo"))
             .build());

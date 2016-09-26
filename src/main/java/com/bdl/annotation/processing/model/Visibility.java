@@ -30,7 +30,7 @@ public enum Visibility {
     return PACKAGE_LOCAL;
   }
 
-  String prefix() {
+  public String prefix() {
     if (this == PACKAGE_LOCAL) {
       return "";
     }

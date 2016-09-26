@@ -1,7 +1,6 @@
 package com.bdl.annotation.processing.model;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -77,7 +76,7 @@ public abstract class InheritanceMetadata implements UsesTypes {
     Builder addInheritanceParam(TypeMetadata type) {
       Preconditions.checkArgument(type.isTypeParameter(),
           "Inheritance type params must be type parameters, was %s",
-          type.fullDescription());
+          type.reference(Imports.empty(), true));
       inheritanceParamsBuilder().add(type);
       return this;
     }
@@ -89,8 +88,10 @@ public abstract class InheritanceMetadata implements UsesTypes {
       Preconditions.checkState(
           metadata.inheritanceParams().size() == metadata.classMetadata().type().params().size(),
           "Cannot inherit %s with type params <%s>, the sizes do not match.",
-          metadata.classMetadata().type().fullDescription(),
-          Joiner.on(", ").join(metadata.inheritanceParams()));
+          metadata.classMetadata().type().reference(Imports.empty(), true),
+          metadata.inheritanceParams().stream()
+              .map(TypeMetadata::toString)
+              .collect(Collectors.joining(", ")));
 
       return metadata;
     }

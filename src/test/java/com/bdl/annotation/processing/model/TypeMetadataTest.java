@@ -41,20 +41,10 @@ public class TypeMetadataTest {
             .setName("Simple")
             .build());
 
-    assertThat(type.nameBuilder().addSimpleName().toString())
-        .isEqualTo("Simple");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .toString())
+    assertThat(type.reference(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.Simple");
 
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addFullParams()
-        .toString())
+    assertThat(type.reference(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.Simple");
   }
 
@@ -72,27 +62,10 @@ public class TypeMetadataTest {
                 .build())
             .build());
 
-    assertThat(type.nameBuilder().addSimpleName().toString())
-        .isEqualTo("Parameterized");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .toString())
-        .isEqualTo("com.bdl.annotation.processing.model.Parameterized");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addSimpleParams()
-        .toString())
+    assertThat(type.reference(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.Parameterized<T>");
 
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addFullParams()
-        .toString())
+    assertThat(type.reference(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.Parameterized<T>");
   }
 
@@ -118,27 +91,10 @@ public class TypeMetadataTest {
                 .build())
             .build());
 
-    assertThat(type.nameBuilder().addSimpleName().toString())
-        .isEqualTo("Field");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .toString())
-        .isEqualTo("com.bdl.annotation.processing.model.Field");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addSimpleParams()
-        .toString())
+    assertThat(type.reference(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.Field<F>");
 
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addFullParams()
-        .toString())
+    assertThat(type.reference(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.Field<F extends com.bdl.annotation.processing.model.Field<F>>");
   }
 
@@ -172,27 +128,10 @@ public class TypeMetadataTest {
                 .build())
             .build());
 
-    assertThat(type.nameBuilder().addSimpleName().toString())
-        .isEqualTo("ParameterizedMultibound");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .toString())
-        .isEqualTo("com.bdl.annotation.processing.model.ParameterizedMultibound");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addSimpleParams()
-        .toString())
+    assertThat(type.reference(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.ParameterizedMultibound<S, T>");
 
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addFullParams()
-        .toString())
+    assertThat(type.reference(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.ParameterizedMultibound"
             + "<S, T extends com.bdl.annotation.processing.model.Simple & com.bdl.annotation.processing.model.Parameterized<S>>");
   }
@@ -226,27 +165,10 @@ public class TypeMetadataTest {
         .build();
     assertThat(type).isEqualTo(expected);
 
-    assertThat(type.nameBuilder().addSimpleName().toString())
-        .isEqualTo("ParameterizedMultibound");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .toString())
-        .isEqualTo("com.bdl.annotation.processing.model.ParameterizedMultibound");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addSimpleParams()
-        .toString())
+    assertThat(type.reference(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.ParameterizedMultibound<S, T>");
 
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addFullParams()
-        .toString())
+    assertThat(type.reference(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.ParameterizedMultibound"
             + "<S, T extends com.bdl.annotation.processing.model.Simple & com.bdl.annotation.processing.model.Parameterized<S>>");
   }
@@ -263,35 +185,15 @@ public class TypeMetadataTest {
             .addOuterClass("TopLevel")
             .build());
 
-    assertThat(type.nameBuilder().addSimpleName().toString())
-        .isEqualTo("Inner");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .toString())
-        .isEqualTo("com.bdl.annotation.processing.model.Inner");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addNestingPrefix()
-        .addSimpleName()
-        .addSimpleParams()
-        .toString())
+    assertThat(type.reference(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.TopLevel.Outer.Inner");
 
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addNestingPrefix()
-        .addSimpleName()
-        .addFullParams()
-        .addBounds()
-        .toString())
+    assertThat(type.reference(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.TopLevel.Outer.Inner");
   }
 
   @Test
-  public void testGenerateImports() {
+  public void testAllTypes() {
     TypeElement element = elements.getTypeElement("com.bdl.annotation.processing.model.ParameterizedMultibound");
     TypeMetadata type = TypeMetadata.fromElement(element);
     assertThat(type.getAllTypes())
@@ -348,29 +250,12 @@ public class TypeMetadataTest {
                 .build())
             .build());
 
-    assertThat(type.nameBuilder().addSimpleName().toString())
-        .isEqualTo("ComplexParameterized");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .toString())
-        .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addSimpleParams()
-        .toString())
+    assertThat(type.reference(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized<X, Y, Z>");
 
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addFullParams()
-        .toString())
+    assertThat(type.reference(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized<"
-            + "X, Y extends java.lang.Comparable<Y>, Z extends java.util.List<Y>>");
+            + "X, Y extends Comparable<Y>, Z extends java.util.List<Y>>");
   }
 
   @Test
@@ -415,28 +300,11 @@ public class TypeMetadataTest {
                 .build())
             .build());
 
-    assertThat(type.nameBuilder().addSimpleName().toString())
-        .isEqualTo("ComplexParameterized");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .toString())
-        .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized");
-
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addSimpleParams()
-        .toString())
+    assertThat(type.reference(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized<A, B, C>");
 
-    assertThat(type.nameBuilder()
-        .addPackagePrefix()
-        .addSimpleName()
-        .addFullParams()
-        .toString())
+    assertThat(type.reference(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized<"
-            + "A, B extends java.lang.Comparable<B>, C extends java.util.List<B>>");
+            + "A, B extends Comparable<B>, C extends java.util.List<B>>");
   }
 }

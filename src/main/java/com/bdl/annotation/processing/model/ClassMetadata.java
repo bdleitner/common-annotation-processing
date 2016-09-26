@@ -64,8 +64,11 @@ public abstract class ClassMetadata implements UsesTypes {
   public Set<TypeMetadata> getAllTypes() {
     ImmutableSet.Builder<TypeMetadata> imports = ImmutableSet.builder();
     imports.addAll(type().getAllTypes());
-    for (InheritanceMetadata inheritance : inheritances()) {
-      imports.addAll(inheritance.getAllTypes());
+    imports.addAll(inheritances().stream()
+        .map((inheritance) -> inheritance.classMetadata().type())
+        .collect(Collectors.toSet()));
+    for (AnnotationMetadata annotation : annotations()) {
+      imports.addAll(annotation.getAllTypes());
     }
     for (ConstructorMetadata constructor : constructors()) {
       imports.addAll(constructor.getAllTypes());
@@ -111,11 +114,7 @@ public abstract class ClassMetadata implements UsesTypes {
   }
 
   public String fullyQualifiedPathName() {
-    return type().nameBuilder()
-        .addPackagePrefix()
-        .addNestingPrefix()
-        .addSimpleName()
-        .toString();
+    return type().packagePrefix() + type().nestingPrefix() + type().name();
   }
 
   @Override
