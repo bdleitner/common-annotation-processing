@@ -49,33 +49,6 @@ javadoc {
     failOnError false
 }
 
-//task jarSources(type: Jar) {
-//    baseName project.name
-//    classifier = 'src'
-//    destinationDir = file('build/libs')
-//    from 'src/main/java/'
-//}
-//
-//task jarDocs(type: Jar) {
-//    dependsOn javadoc
-//    baseName project.name
-//    classifier = 'javadoc'
-//    destinationDir = file('build/libs')
-//    from 'build/docs/javadoc/'
-//}
-//
-//task copyJars(type: Copy) {
-//    dependsOn jar, jarSources, jarDocs
-//    from 'build/libs'
-//    include '*.jar'
-//    into '../build/libs'
-//}
-//
-//build {
-//    dependsOn copyJars
-//}
-
-
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
