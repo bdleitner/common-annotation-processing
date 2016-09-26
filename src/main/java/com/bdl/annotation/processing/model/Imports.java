@@ -115,7 +115,9 @@ public class Imports {
       return ReferenceType.NAME_ONLY;
     }
     if (type.packageName().equals(packageName)) {
-      return ReferenceType.NAME_ONLY;
+      return type.outerClassNames().isEmpty()
+          ? ReferenceType.NAME_ONLY
+          : ReferenceType.NESTED_NAME;
     }
     ReferenceType referenceType = referenceMap.get(type.rawType());
     return referenceType == null
