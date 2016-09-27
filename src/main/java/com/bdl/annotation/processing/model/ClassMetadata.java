@@ -22,7 +22,7 @@ import javax.lang.model.type.TypeMirror;
  * @author Ben Leitner
  */
 @AutoValue
-public abstract class ClassMetadata implements UsesTypes {
+public abstract class ClassMetadata implements UsesTypes, Annotatable {
 
   /** Enumeration of the possible types to AutoAdapt: Class and Interface. */
   public enum Category {
@@ -41,9 +41,10 @@ public abstract class ClassMetadata implements UsesTypes {
     }
   }
 
+  private ImmutableList<FieldMetadata> allFields;
   private ImmutableList<MethodMetadata> allMethods;
 
-  /** Annotations defined on the class. */
+  @Override
   public abstract ImmutableList<AnnotationMetadata> annotations();
 
   /** The AutoAdaptee's {@link Category}. */
@@ -57,7 +58,10 @@ public abstract class ClassMetadata implements UsesTypes {
 
   public abstract ImmutableSet<ConstructorMetadata> constructors();
 
-  /** Methods that are declared in this type. */
+  /** Fields that are declared in this class. */
+  public abstract ImmutableList<FieldMetadata> fields();
+
+  /** Methods that are declared in this class. */
   public abstract ImmutableList<MethodMetadata> methods();
 
   @Override
@@ -77,6 +81,23 @@ public abstract class ClassMetadata implements UsesTypes {
       imports.addAll(method.getAllTypes());
     }
     return imports.build();
+  }
+
+  public ImmutableList<FieldMetadata> getAllFields() {
+    if (allFields == null) {
+      Stream<FieldMetadata> fieldStream = Stream.empty();
+      for (InheritanceMetadata inheritance : inheritances()) {
+        fieldStream = Stream.concat(
+            fieldStream,
+            inheritance.getAllFields().stream()
+                .filter((field) -> field.visibility() != Visibility.PRIVATE));
+      }
+
+      fieldStream = Stream.concat(fieldStream, fields().stream());
+
+      allFields = ImmutableList.copyOf(fieldStream.sorted().collect(Collectors.toList()));
+    }
+    return allFields;
   }
 
   /** Methods declared in this type or in any supertype / interface. */
@@ -148,6 +169,9 @@ public abstract class ClassMetadata implements UsesTypes {
       if (enclosed.getKind() == ElementKind.CONSTRUCTOR) {
         metadata.addConstructor(ConstructorMetadata.fromConstructor(enclosed));
       }
+      if (enclosed.getKind() == ElementKind.FIELD) {
+        metadata.addField(FieldMetadata.from(enclosed));
+      }
     }
     return metadata.build();
   }
@@ -168,6 +192,8 @@ public abstract class ClassMetadata implements UsesTypes {
 
     abstract ImmutableSet.Builder<ConstructorMetadata> constructorsBuilder();
 
+    abstract ImmutableList.Builder<FieldMetadata> fieldsBuilder();
+
     abstract ImmutableList.Builder<MethodMetadata> methodsBuilder();
 
     public Builder addInheritance(InheritanceMetadata inheritance) {
@@ -182,6 +208,11 @@ public abstract class ClassMetadata implements UsesTypes {
 
     public Builder addConstructor(ConstructorMetadata constructor) {
       constructorsBuilder().add(constructor);
+      return this;
+    }
+
+    public Builder addField(FieldMetadata field) {
+      fieldsBuilder().add(field);
       return this;
     }
 

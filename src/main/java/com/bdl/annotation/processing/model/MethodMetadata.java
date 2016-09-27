@@ -27,12 +27,13 @@ import javax.lang.model.element.VariableElement;
  * @author Ben Leitner
  */
 @AutoValue
-public abstract class MethodMetadata implements Comparable<MethodMetadata>, UsesTypes {
+public abstract class MethodMetadata implements Comparable<MethodMetadata>, UsesTypes, Annotatable {
 
   private static final Comparator<MethodMetadata> COMPARATOR = comparing(MethodMetadata::visibility)
       .thenComparing(MethodMetadata::name)
       .thenComparing(MethodMetadata::parameters, Comparators.forLists(ParameterMetadata::type));
 
+  @Override
   public abstract ImmutableList<AnnotationMetadata> annotations();
 
   public abstract Visibility visibility();

@@ -9,7 +9,8 @@ import com.google.common.base.Strings;
  */
 abstract class AbstractSuperclass<Q> implements Simple, OtherParameterized<Q> {
 
-  protected final String aString;
+  protected final Parameterized<Q> superParameterized = null;
+  private final String aString;
 
   protected AbstractSuperclass(String aString) {
     this.aString = aString;

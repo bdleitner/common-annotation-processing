@@ -22,7 +22,8 @@ import javax.lang.model.util.Elements;
 @RunWith(JUnit4.class)
 public class ClassMetadataTest {
 
-  @Rule public final CompilationRule compilation = new CompilationRule();
+  @Rule
+  public final CompilationRule compilation = new CompilationRule();
 
   private ClassMetadata metadata;
 
@@ -34,7 +35,129 @@ public class ClassMetadataTest {
   }
 
   @Test
-  public void testRequiredMethods() {
+  public void testFields() {
+    TypeMetadata classType = TypeMetadata.builder()
+        .setPackageName("com.bdl.annotation.processing.model")
+        .setName("AbstractClass")
+        .addParam(simpleTypeParam("A"))
+        .addParam(TypeMetadata.builder()
+            .setIsTypeParameter(true)
+            .setName("B")
+            .addBound(TypeMetadata.builder()
+                .setPackageName("java.lang")
+                .setName("Comparable")
+                .addParam(simpleTypeParam("B"))
+                .build())
+            .build())
+        .addParam(TypeMetadata.builder()
+            .setIsTypeParameter(true)
+            .setName("C")
+            .addBound(TypeMetadata.builder()
+                .setPackageName("java.util")
+                .setName("List")
+                .addParam(simpleTypeParam("B"))
+                .build())
+            .build())
+        .build();
+    assertThat(metadata.fields()).containsExactly(
+        FieldMetadata.builder()
+            .containingClass(classType)
+            .visibility(Visibility.PRIVATE)
+            .type(TypeMetadata.INT)
+            .name("anInt")
+            .build(),
+        FieldMetadata.builder()
+            .containingClass(classType)
+            .visibility(Visibility.PACKAGE_LOCAL)
+            .type(TypeMetadata.builder()
+                .setPackageName("com.bdl.annotation.processing.model")
+                .setName("Parameterized")
+                .addParam(TypeMetadata.simpleTypeParam("A"))
+                .build())
+            .name("parameterized")
+            .build());
+  }
+
+  @Test
+  public void testAllFields() {
+    TypeMetadata classType = TypeMetadata.builder()
+        .setPackageName("com.bdl.annotation.processing.model")
+        .setName("AbstractClass")
+        .addParam(simpleTypeParam("A"))
+        .addParam(TypeMetadata.builder()
+            .setIsTypeParameter(true)
+            .setName("B")
+            .addBound(TypeMetadata.builder()
+                .setPackageName("java.lang")
+                .setName("Comparable")
+                .addParam(simpleTypeParam("B"))
+                .build())
+            .build())
+        .addParam(TypeMetadata.builder()
+            .setIsTypeParameter(true)
+            .setName("C")
+            .addBound(TypeMetadata.builder()
+                .setPackageName("java.util")
+                .setName("List")
+                .addParam(simpleTypeParam("B"))
+                .build())
+            .build())
+        .build();
+    TypeMetadata superClassType = TypeMetadata.builder()
+        .setPackageName("com.bdl.annotation.processing.model")
+        .setName("AbstractSuperclass")
+        .addParam(simpleTypeParam("B"))
+        .build();
+
+    assertThat(metadata.getAllFields()).containsExactly(
+        FieldMetadata.builder()
+            .containingClass(superClassType)
+            .visibility(Visibility.PROTECTED)
+            .type(TypeMetadata.builder()
+                .setPackageName("com.bdl.annotation.processing.model")
+                .setName("Parameterized")
+                .addParam(TypeMetadata.simpleTypeParam("B"))
+                .build())
+            .name("superParameterized")
+            .build(),
+        FieldMetadata.builder()
+            .containingClass(classType)
+            .visibility(Visibility.PACKAGE_LOCAL)
+            .type(TypeMetadata.builder()
+                .setPackageName("com.bdl.annotation.processing.model")
+                .setName("Parameterized")
+                .addParam(TypeMetadata.simpleTypeParam("A"))
+                .build())
+            .name("parameterized")
+            .build(),
+        FieldMetadata.builder()
+            .containingClass(classType)
+            .visibility(Visibility.PRIVATE)
+            .type(TypeMetadata.INT)
+            .name("anInt")
+            .build())
+        .inOrder();
+  }
+
+  @Test
+  public void testMethods() {
+    assertThat(metadata.methods()).containsExactly(
+        MethodMetadata.builder()
+            .setVisibility(Visibility.PUBLIC)
+            .setType(simpleTypeParam("A"))
+            .setName("frozzle")
+            .addParameter(ParameterMetadata.of(simpleTypeParam("A"), "input"))
+            .build(),
+        MethodMetadata.builder()
+            .setVisibility(Visibility.PROTECTED)
+            .setType(TypeMetadata.INT)
+            .setName("fromSuper")
+            .addParameter(ParameterMetadata.of(TypeMetadata.INT, "foo"))
+            .build());
+  }
+
+  @Test
+  public void testAllMethods() {
     TypeMetadata typeEExtendsListOfD = TypeMetadata.builder()
         .setName("E")
         .addBound(TypeMetadata.builder()

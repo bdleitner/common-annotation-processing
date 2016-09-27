@@ -12,6 +12,9 @@ abstract class AbstractClass<A, B extends Comparable<B>, C extends List<B>>
     extends AbstractSuperclass<B>
     implements ExtendedExtendedParameterized<A>, ComplexParameterized<A, B, C>, OtherSimple {
 
+  private final int anInt = 5;
+  Parameterized<A> parameterized;
+
   private AbstractClass(String blargh) {
     super(blargh);
   }

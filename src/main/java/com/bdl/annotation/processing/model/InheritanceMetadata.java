@@ -20,6 +20,7 @@ import javax.lang.model.type.TypeMirror;
 @AutoValue
 public abstract class InheritanceMetadata implements UsesTypes {
 
+  private ImmutableList<FieldMetadata> allFields;
   private ImmutableList<MethodMetadata> allMethods;
 
   /** The type parameters given in the {@code extends} or {@code implements} clause. */
@@ -30,6 +31,21 @@ public abstract class InheritanceMetadata implements UsesTypes {
   @Override
   public Set<TypeMetadata> getAllTypes() {
     return classMetadata().getAllTypes();
+  }
+
+  ImmutableList<FieldMetadata> getAllFields() {
+    if (allFields == null) {
+      final Map<String, String> paramNamesMap = getParamNamesMap();
+      allFields = ImmutableList.copyOf(
+          classMetadata().getAllFields()
+              .stream()
+              .map(input -> input.toBuilder()
+                  .containingClass(input.containingClass().convertTypeParams(paramNamesMap))
+                  .type(input.type().convertTypeParams(paramNamesMap))
+                  .build())
+              .collect(Collectors.toList()));
+    }
+    return allFields;
   }
 
   ImmutableList<MethodMetadata> getAllMethods() {
