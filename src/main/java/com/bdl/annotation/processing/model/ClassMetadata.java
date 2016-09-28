@@ -144,9 +144,10 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
   }
 
   public static ClassMetadata fromElement(Element element) {
+    TypeMetadata type = TypeMetadata.fromElement(element);
     Builder metadata = builder()
         .setCategory(Category.forKind(element.getKind()))
-        .setType(TypeMetadata.fromElement(element));
+        .setType(type);
 
     for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
       metadata.addAnnotation(AnnotationMetadata.fromType(annotationMirror));
@@ -170,7 +171,7 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
         metadata.addConstructor(ConstructorMetadata.fromConstructor(enclosed));
       }
       if (enclosed.getKind() == ElementKind.FIELD) {
-        metadata.addField(FieldMetadata.from(enclosed));
+        metadata.addField(FieldMetadata.from(type, enclosed));
       }
     }
     return metadata.build();
