@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
@@ -23,6 +24,11 @@ public abstract class AnnotationMetadata implements UsesTypes {
   public abstract TypeMetadata type();
 
   public abstract ImmutableMap<String, ValueMetadata> values();
+
+  @Nullable
+  public ValueMetadata value(String name) {
+    return values().get(name);
+  }
 
   @Override
   public Set<TypeMetadata> getAllTypes() {
