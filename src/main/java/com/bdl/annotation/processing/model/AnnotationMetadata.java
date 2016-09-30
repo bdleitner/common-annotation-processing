@@ -22,15 +22,14 @@ public abstract class AnnotationMetadata implements UsesTypes {
   /** The type of the annotation. */
   public abstract TypeMetadata type();
 
-  public abstract ImmutableMap<MethodMetadata, ValueMetadata> values();
+  public abstract ImmutableMap<String, ValueMetadata> values();
 
   @Override
   public Set<TypeMetadata> getAllTypes() {
     ImmutableSet.Builder<TypeMetadata> imports = ImmutableSet.builder();
     imports.addAll(type().getAllTypes());
-    for (Map.Entry<MethodMetadata, ValueMetadata> entry : values().entrySet()) {
-      imports.addAll(entry.getKey().getAllTypes());
-      imports.addAll(entry.getValue().type().getAllTypes());
+    for (ValueMetadata value : values().values()) {
+      imports.addAll(value.type().getAllTypes());
     }
     return imports.build();
   }
@@ -42,7 +41,7 @@ public abstract class AnnotationMetadata implements UsesTypes {
         : mirror.getElementValues().entrySet()) {
       MethodMetadata method = MethodMetadata.fromMethod(entry.getKey());
       metadata.putValue(
-          method,
+          method.name(),
           ValueMetadata.create(method.type(), entry.getValue().getValue().toString()));
     }
     return metadata.build();
@@ -55,10 +54,10 @@ public abstract class AnnotationMetadata implements UsesTypes {
   @AutoValue.Builder
   abstract static class Builder {
     abstract Builder setType(TypeMetadata type);
-    abstract ImmutableMap.Builder<MethodMetadata, ValueMetadata> valuesBuilder();
+    abstract ImmutableMap.Builder<String, ValueMetadata> valuesBuilder();
 
-    Builder putValue(MethodMetadata metadata, ValueMetadata object) {
-      valuesBuilder().put(metadata, object);
+    Builder putValue(String methodName, ValueMetadata object) {
+      valuesBuilder().put(methodName, object);
       return this;
     }
 

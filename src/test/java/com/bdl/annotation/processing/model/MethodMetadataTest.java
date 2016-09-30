@@ -112,20 +112,10 @@ public class MethodMetadataTest {
         .addAnnotation(AnnotationMetadata.builder()
             .setType(TestingTypes.SOME_ANNOTATION)
             .putValue(
-                MethodMetadata.builder()
-                    .setVisibility(Visibility.PUBLIC)
-                    .setIsAbstract(true)
-                    .setType(TypeMetadata.STRING)
-                    .setName("value")
-                    .build(),
+                "value",
                 ValueMetadata.create(TypeMetadata.STRING, "foo"))
             .putValue(
-                MethodMetadata.builder()
-                    .setVisibility(Visibility.PUBLIC)
-                    .setIsAbstract(true)
-                    .setType(TestingTypes.ANNOTATION_OPTION)
-                    .setName("option")
-                    .build(),
+                "option",
                 ValueMetadata.create(TestingTypes.ANNOTATION_OPTION, "SECOND"))
             .build())
         .build());

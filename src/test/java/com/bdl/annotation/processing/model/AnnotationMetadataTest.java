@@ -38,30 +38,14 @@ public class AnnotationMetadataTest {
             .setName("SomeAnnotation")
             .build())
         .putValue(
-            MethodMetadata.builder()
-                .setVisibility(Visibility.PUBLIC)
-                .setIsAbstract(true)
-                .setType(TypeMetadata.STRING)
-                .setName("value")
-                .build(),
+            "value",
             ValueMetadata.create(TypeMetadata.STRING, "class"))
         .putValue(
-            MethodMetadata.builder()
-                .setVisibility(Visibility.PUBLIC)
-                .setIsAbstract(true)
-                .setType(TypeMetadata.INT)
-                .setName("anInt")
-                .build(),
+            "anInt",
             ValueMetadata.create(TypeMetadata.INT, "5"))
         .putValue(
-            MethodMetadata.builder()
-                .setVisibility(Visibility.PUBLIC)
-                .setIsAbstract(true)
-                .setType(TestingTypes.ANNOTATION_OPTION)
-                .setName("option")
-                .build(),
-            ValueMetadata.create(TestingTypes.ANNOTATION_OPTION,
-                "THIRD"))
+            "option",
+            ValueMetadata.create(TestingTypes.ANNOTATION_OPTION, "THIRD"))
         .build();
     assertThat(actual).isEqualTo(expected);
   }
