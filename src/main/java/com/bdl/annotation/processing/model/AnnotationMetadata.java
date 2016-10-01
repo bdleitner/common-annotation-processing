@@ -41,9 +41,9 @@ public abstract class AnnotationMetadata implements UsesTypes {
     return imports.build();
   }
 
-  public String reference(Imports imports) {
+  public String toString(Imports imports) {
     StringBuilder s = new StringBuilder("@");
-    s.append(type().reference(imports));
+    s.append(type().toString(imports));
     if (values().isEmpty()) {
       return s.toString();
     }

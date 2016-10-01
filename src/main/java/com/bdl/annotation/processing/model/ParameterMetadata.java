@@ -48,7 +48,7 @@ public abstract class ParameterMetadata implements UsesTypes {
 
   public String toString(Imports imports) {
     return String.format("%s %s",
-        type().reference(imports),
+        type().toString(imports),
         name());
   }
 }

@@ -63,6 +63,7 @@ public class ClassMetadataTest {
         FieldMetadata.builder()
             .containingClass(classType)
             .visibility(Visibility.PRIVATE)
+            .isFinal(true)
             .type(TypeMetadata.INT)
             .name("anInt")
             .build(),
@@ -113,6 +114,7 @@ public class ClassMetadataTest {
         FieldMetadata.builder()
             .containingClass(superClassType)
             .visibility(Visibility.PROTECTED)
+            .isFinal(true)
             .type(TypeMetadata.builder()
                 .setPackageName("com.bdl.annotation.processing.model")
                 .setName("Parameterized")
@@ -133,6 +135,7 @@ public class ClassMetadataTest {
         FieldMetadata.builder()
             .containingClass(classType)
             .visibility(Visibility.PRIVATE)
+            .isFinal(true)
             .type(TypeMetadata.INT)
             .name("anInt")
             .build())

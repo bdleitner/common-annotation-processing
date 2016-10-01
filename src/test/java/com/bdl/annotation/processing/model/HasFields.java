@@ -12,10 +12,10 @@ public class HasFields {
   protected Object bar;
 
   @SomeAnnotation
-  public int baz;
+  public static int baz;
 
-  long blargh = 5;
+  final long blargh = 5;
 
   private String[] array;
-  private int[][][] threeDArray;
+  private static final int[][][] threeDArray = new int[1][2][3];
 }

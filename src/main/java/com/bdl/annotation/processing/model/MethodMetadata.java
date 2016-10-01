@@ -94,6 +94,9 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
   @Override
   public Set<TypeMetadata> getAllTypes() {
     ImmutableSet.Builder<TypeMetadata> imports = ImmutableSet.builder();
+    for (AnnotationMetadata annotation : annotations()) {
+      imports.addAll(annotation.getAllTypes());
+    }
     for (TypeMetadata typeParam : typeParameters()) {
       imports.addAll(typeParam.getAllTypes());
     }
@@ -110,16 +113,16 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
     }
     return String.format("<%s> ",
         typeParameters().stream()
-            .map(input -> input.reference(imports, true))
+            .map(input -> input.toString(imports, true))
             .collect(Collectors.joining(", ")));
   }
 
-  public String fullDescription(Imports imports) {
+  public String toString(Imports imports) {
     return String.format("%s%s%s%s %s(%s)",
         visibility().prefix(),
         isAbstract() ? "abstract " : "",
         typeParametersPrefix(imports),
-        type().reference(imports),
+        type().toString(imports),
         name(),
         parameters().stream()
             .map((param) -> param.toString(imports))
@@ -136,7 +139,7 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
 
   @Override
   public String toString() {
-    return fullDescription(Imports.empty());
+    return toString(Imports.empty());
   }
 
   abstract Builder toBuilder();

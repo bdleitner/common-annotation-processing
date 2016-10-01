@@ -7,7 +7,7 @@ import java.util.Set;
  *
  * @author Ben Leitner
  */
-interface UsesTypes {
+public interface UsesTypes {
 
   Set<TypeMetadata> getAllTypes();
 }

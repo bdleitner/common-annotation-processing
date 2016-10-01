@@ -43,10 +43,10 @@ public class TypeMetadataTest {
             .setName("Simple")
             .build());
 
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.Simple");
 
-    assertThat(type.reference(Imports.empty(), true))
+    assertThat(type.toString(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.Simple");
   }
 
@@ -64,10 +64,10 @@ public class TypeMetadataTest {
                 .build())
             .build());
 
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.Parameterized<T>");
 
-    assertThat(type.reference(Imports.empty(), true))
+    assertThat(type.toString(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.Parameterized<T>");
   }
 
@@ -93,10 +93,10 @@ public class TypeMetadataTest {
                 .build())
             .build());
 
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.Field<F>");
 
-    assertThat(type.reference(Imports.empty(), true))
+    assertThat(type.toString(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.Field<F extends com.bdl.annotation.processing.model.Field<F>>");
   }
 
@@ -130,10 +130,10 @@ public class TypeMetadataTest {
                 .build())
             .build());
 
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.ParameterizedMultibound<S, T>");
 
-    assertThat(type.reference(Imports.empty(), true))
+    assertThat(type.toString(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.ParameterizedMultibound"
             + "<S, T extends com.bdl.annotation.processing.model.Simple & com.bdl.annotation.processing.model.Parameterized<S>>");
   }
@@ -167,10 +167,10 @@ public class TypeMetadataTest {
         .build();
     assertThat(type).isEqualTo(expected);
 
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.ParameterizedMultibound<S, T>");
 
-    assertThat(type.reference(Imports.empty(), true))
+    assertThat(type.toString(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.ParameterizedMultibound"
             + "<S, T extends com.bdl.annotation.processing.model.Simple & com.bdl.annotation.processing.model.Parameterized<S>>");
   }
@@ -187,10 +187,10 @@ public class TypeMetadataTest {
             .addOuterClass("TopLevel")
             .build());
 
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.TopLevel.Outer.Inner");
 
-    assertThat(type.reference(Imports.empty(), true))
+    assertThat(type.toString(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.TopLevel.Outer.Inner");
   }
 
@@ -205,10 +205,10 @@ public class TypeMetadataTest {
             .addOuterClass("TopLevel")
             .build());
 
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.TopLevel.Outer.Inner");
 
-    assertThat(type.reference(Imports.empty(), true))
+    assertThat(type.toString(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.TopLevel.Outer.Inner");
   }
 
@@ -270,10 +270,10 @@ public class TypeMetadataTest {
                 .build())
             .build());
 
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized<X, Y, Z>");
 
-    assertThat(type.reference(Imports.empty(), true))
+    assertThat(type.toString(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized<"
             + "X, Y extends Comparable<Y>, Z extends java.util.List<Y>>");
   }
@@ -320,10 +320,10 @@ public class TypeMetadataTest {
                 .build())
             .build());
 
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized<A, B, C>");
 
-    assertThat(type.reference(Imports.empty(), true))
+    assertThat(type.toString(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized<"
             + "A, B extends Comparable<B>, C extends java.util.List<B>>");
   }
@@ -343,7 +343,7 @@ public class TypeMetadataTest {
     TypeMetadata type = TypeMetadata.fromType(field.asType());
     assertThat(type).isEqualTo(TypeMetadata.STRING.arrayOf());
 
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("String[]");
   }
 
@@ -362,7 +362,7 @@ public class TypeMetadataTest {
     TypeMetadata type = TypeMetadata.fromType(field.asType());
     assertThat(type).isEqualTo(
         TypeMetadata.INT.arrayOf().arrayOf().arrayOf());
-    assertThat(type.reference(Imports.empty()))
+    assertThat(type.toString(Imports.empty()))
         .isEqualTo("int[][][]");
   }
 }

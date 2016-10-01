@@ -20,6 +20,8 @@ import java.util.Map;
  */
 public class Imports {
 
+  private static final Imports EMPTY_IMPORTS = create(null, ImmutableList.of());
+
   public enum ReferenceType {
     NAME_ONLY,
     NESTED_NAME,
@@ -40,7 +42,7 @@ public class Imports {
   }
 
   public static Imports empty() {
-    return create(null, ImmutableList.of());
+    return EMPTY_IMPORTS;
   }
 
   private static Multimap<String, TypeMetadata> namesToTypes(Iterable<TypeMetadata> imports) {

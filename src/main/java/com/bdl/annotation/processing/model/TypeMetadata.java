@@ -133,11 +133,11 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     return prefix.isEmpty() ? "" : prefix + delimiter;
   }
 
-  public String reference(Imports imports) {
-    return reference(imports, false);
+  public String toString(Imports imports) {
+    return toString(imports, false);
   }
 
-  public String reference(Imports imports, boolean withBounds) {
+  public String toString(Imports imports, boolean withBounds) {
     StringBuilder s = new StringBuilder();
     Imports.ReferenceType referenceType = imports.reference(this);
     switch (referenceType) {
@@ -153,14 +153,14 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     if (!params().isEmpty()) {
       s.append("<");
       s.append(params().stream()
-          .map((type) -> type.reference(imports, withBounds))
+          .map((type) -> type.toString(imports, withBounds))
           .collect(Collectors.joining(", ")));
       s.append(">");
     }
     if (withBounds && !bounds().isEmpty()) {
       s.append(" extends ");
       s.append(bounds().stream()
-          .map((type) -> type.reference(imports, false)) // do not recurse on bounds
+          .map((type) -> type.toString(imports, false)) // do not recurse on bounds
           .collect(Collectors.joining(" & ")));
     }
     for (int i = 0; i < arrayDepth(); i++) {
@@ -236,7 +236,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     if (!isTypeParameter()) {
       Preconditions.checkArgument(newParams.size() == params().size(),
           "Cannot convert %s to using type params <%s>, the number of params does not match.",
-          reference(Imports.empty()),
+          toString(Imports.empty()),
           newParams.stream().map(TypeMetadata::name).collect(Collectors.joining(", ")));
       ImmutableMap.Builder<String, String> paramNameMapBuilder = ImmutableMap.builder();
       int i = 0;
@@ -248,7 +248,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     } else {
       Preconditions.checkArgument(newParams.size() == 1,
           "Cannot convert %s to type params <%s>, exactly 1 type parameter is required.",
-          reference(Imports.empty()),
+          toString(Imports.empty()),
           newParams.stream().map(TypeMetadata::name).collect(Collectors.joining(", ")));
       return convertTypeParams(ImmutableMap.of(name(), newParams.get(0).name()));
     }
@@ -290,7 +290,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
 
   @Override
   public String toString() {
-    return reference(Imports.empty());
+    return toString(Imports.empty());
   }
 
   private static String getSimpleName(TypeMirror type) {
@@ -489,16 +489,16 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
       if (metadata.isTypeParameter()) {
         Preconditions.checkState(metadata.params().isEmpty(),
             "Type parameters given for type-parameter: %s",
-            metadata.reference(Imports.empty()));
+            metadata.toString(Imports.empty()));
         Preconditions.checkState(metadata.outerClassNames().isEmpty(),
             "Nesting classes given type-parameter: %s",
-            metadata.reference(Imports.empty()));
+            metadata.toString(Imports.empty()));
         Preconditions.checkState(metadata.packageName().isEmpty(),
             "Nonempty package given for type-parameter: %s",
-            metadata.reference(Imports.empty()));
+            metadata.toString(Imports.empty()));
       } else {
         Preconditions.checkState(metadata.bounds().isEmpty(),
-            "Bounds given for non-type-parameter: %s", metadata.reference(Imports.empty()));
+            "Bounds given for non-type-parameter: %s", metadata.toString(Imports.empty()));
       }
       return metadata;
     }

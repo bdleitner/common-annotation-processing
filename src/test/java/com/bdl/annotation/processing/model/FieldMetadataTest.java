@@ -46,12 +46,13 @@ public class FieldMetadataTest {
 
     Element foo = getElement(typeElement, "foo");
     FieldMetadata field = FieldMetadata.from(foo);
+    TypeMetadata hasFieldsType = TypeMetadata.builder()
+        .setPackageName("com.bdl.annotation.processing.model")
+        .setName("HasFields")
+        .build();
     assertThat(field).isEqualTo(
         FieldMetadata.builder()
-            .containingClass(TypeMetadata.builder()
-                .setPackageName("com.bdl.annotation.processing.model")
-                .setName("HasFields")
-                .build())
+            .containingClass(hasFieldsType)
             .visibility(Visibility.PRIVATE)
             .name("foo")
             .type(TypeMetadata.STRING)
@@ -61,10 +62,7 @@ public class FieldMetadataTest {
     field = FieldMetadata.from(bar);
     assertThat(field).isEqualTo(
         FieldMetadata.builder()
-            .containingClass(TypeMetadata.builder()
-                .setPackageName("com.bdl.annotation.processing.model")
-                .setName("HasFields")
-                .build())
+            .containingClass(hasFieldsType)
             .visibility(Visibility.PROTECTED)
             .name("bar")
             .type(TypeMetadata.OBJECT)
@@ -74,14 +72,12 @@ public class FieldMetadataTest {
     field = FieldMetadata.from(baz);
     assertThat(field).isEqualTo(
         FieldMetadata.builder()
-            .containingClass(TypeMetadata.builder()
-                .setPackageName("com.bdl.annotation.processing.model")
-                .setName("HasFields")
-                .build())
+            .containingClass(hasFieldsType)
             .addAnnotation(AnnotationMetadata.builder()
                 .setType(TestingTypes.SOME_ANNOTATION)
                 .build())
             .visibility(Visibility.PUBLIC)
+            .isStatic(true)
             .name("baz")
             .type(TypeMetadata.INT)
             .build());
@@ -90,13 +86,23 @@ public class FieldMetadataTest {
     field = FieldMetadata.from(blargh);
     assertThat(field).isEqualTo(
         FieldMetadata.builder()
-            .containingClass(TypeMetadata.builder()
-                .setPackageName("com.bdl.annotation.processing.model")
-                .setName("HasFields")
-                .build())
+            .containingClass(hasFieldsType)
             .visibility(Visibility.PACKAGE_LOCAL)
+            .isFinal(true)
             .name("blargh")
             .type(TypeMetadata.LONG)
+            .build());
+
+    Element threeDArray = getElement(typeElement, "threeDArray");
+    field = FieldMetadata.from(threeDArray);
+    assertThat(field).isEqualTo(
+        FieldMetadata.builder()
+            .containingClass(hasFieldsType)
+            .visibility(Visibility.PRIVATE)
+            .isStatic(true)
+            .isFinal(true)
+            .name("threeDArray")
+            .type(TypeMetadata.INT.arrayOf().arrayOf().arrayOf())
             .build());
   }
 }
