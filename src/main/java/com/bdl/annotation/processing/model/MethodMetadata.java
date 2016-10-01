@@ -94,9 +94,6 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
   @Override
   public Set<TypeMetadata> getAllTypes() {
     ImmutableSet.Builder<TypeMetadata> imports = ImmutableSet.builder();
-    for (AnnotationMetadata annotation : annotations()) {
-      imports.addAll(annotation.getAllTypes());
-    }
     for (TypeMetadata typeParam : typeParameters()) {
       imports.addAll(typeParam.getAllTypes());
     }

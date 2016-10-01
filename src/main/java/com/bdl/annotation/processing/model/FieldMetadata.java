@@ -3,7 +3,6 @@ package com.bdl.annotation.processing.model;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 
 import java.util.Comparator;
 import java.util.Set;
@@ -43,12 +42,7 @@ public abstract class FieldMetadata implements Annotatable, Comparable<FieldMeta
 
   @Override
   public Set<TypeMetadata> getAllTypes() {
-    ImmutableSet.Builder<TypeMetadata> imports = ImmutableSet.builder();
-    for (AnnotationMetadata annotation : annotations()) {
-      imports.addAll(annotation.getAllTypes());
-    }
-    imports.addAll(type().getAllTypes());
-    return imports.build();
+    return type().getAllTypes();
   }
 
   public String toString(Imports imports) {
