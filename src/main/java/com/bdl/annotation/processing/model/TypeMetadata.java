@@ -44,8 +44,31 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
   public static final TypeMetadata LONG = builder()
       .setName("long")
       .build();
+  public static final TypeMetadata DOUBLE = builder()
+      .setName("double")
+      .build();
   public static final TypeMetadata BOOLEAN = builder()
       .setName("boolean")
+      .build();
+  public static final TypeMetadata BOXED_VOID = builder()
+      .setPackageName("java.lang")
+      .setName("Void")
+      .build();
+  public static final TypeMetadata BOXED_INTEGER = builder()
+      .setPackageName("java.lang")
+      .setName("Integer")
+      .build();
+  public static final TypeMetadata BOXED_LONG = builder()
+      .setPackageName("java.lang")
+      .setName("Long")
+      .build();
+  public static final TypeMetadata BOXED_DOUBLE = builder()
+      .setPackageName("java.lang")
+      .setName("Double")
+      .build();
+  public static final TypeMetadata BOXED_BOOLEAN = builder()
+      .setPackageName("java.lang")
+      .setName("Boolean")
       .build();
   public static final TypeMetadata STRING = builder()
       .setPackageName("java.lang")
@@ -239,7 +262,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     return builder.build();
   }
 
-  TypeMetadata rawType() {
+  public TypeMetadata rawType() {
     Preconditions.checkState(!isTypeParameter(), "Cannot take the raw type of type parameter %s", this);
     if (params().isEmpty()) {
       return this;
@@ -375,6 +398,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     Class<?> enclosing = clazz.getEnclosingClass();
     while (enclosing != null) {
       metadata.addOuterClass(enclosing.getSimpleName());
+      enclosing = enclosing.getEnclosingClass();
     }
     if (includeParams) {
       for (java.lang.reflect.TypeVariable<? extends Class<?>> variable : clazz.getTypeParameters()) {

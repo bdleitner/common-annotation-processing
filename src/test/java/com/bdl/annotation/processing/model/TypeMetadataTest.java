@@ -193,6 +193,24 @@ public class TypeMetadataTest {
   }
 
   @Test
+  public void testNestedClasses_fromType() {
+    TypeMetadata type = TypeMetadata.from(TopLevel.Outer.Inner.class);
+    assertThat(type).isEqualTo(
+        TypeMetadata.builder()
+            .setPackageName("com.bdl.annotation.processing.model")
+            .setName("Inner")
+            .addOuterClass("Outer")
+            .addOuterClass("TopLevel")
+            .build());
+
+    assertThat(type.reference(Imports.empty()))
+        .isEqualTo("com.bdl.annotation.processing.model.TopLevel.Outer.Inner");
+
+    assertThat(type.reference(Imports.empty(), true))
+        .isEqualTo("com.bdl.annotation.processing.model.TopLevel.Outer.Inner");
+  }
+
+  @Test
   public void testAllTypes() {
     TypeElement element = elements.getTypeElement("com.bdl.annotation.processing.model.ParameterizedMultibound");
     TypeMetadata type = TypeMetadata.fromElement(element);
