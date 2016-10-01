@@ -13,8 +13,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 
 /**
@@ -35,10 +35,11 @@ public class MethodMetadataTest {
     elements = compilation.getElements();
   }
 
-  private Element getMethodElement(String fullyQualifiedClassName, String methodName) {
+  private ExecutableElement getMethodElement(String fullyQualifiedClassName, String methodName) {
     for (Element element : elements.getAllMembers(elements.getTypeElement(fullyQualifiedClassName))) {
-      if (element.getSimpleName().toString().equals(methodName)) {
-        return element;
+      if (element.getKind() == ElementKind.METHOD
+          && element.getSimpleName().toString().equals(methodName)) {
+        return (ExecutableElement) element;
       }
     }
     throw new IllegalArgumentException(
@@ -70,7 +71,7 @@ public class MethodMetadataTest {
   @Test
   public void testSimpleMethod() {
     MethodMetadata method = MethodMetadata.fromMethod(
-        (ExecutableElement) getMethodElement("com.bdl.annotation.processing.model.Simple", "add"));
+        getMethodElement("com.bdl.annotation.processing.model.Simple", "add"));
     assertThat(method).isEqualTo(MethodMetadata.builder()
         .setVisibility(Visibility.PUBLIC)
         .setIsAbstract(true)
@@ -81,7 +82,7 @@ public class MethodMetadataTest {
         .build());
 
     method = MethodMetadata.fromMethod(
-        (ExecutableElement) getMethodElement("com.bdl.annotation.processing.model.Simple", "repeat"));
+        getMethodElement("com.bdl.annotation.processing.model.Simple", "repeat"));
     assertThat(method).isEqualTo(MethodMetadata.builder()
         .setVisibility(Visibility.PUBLIC)
         .setIsAbstract(true)
@@ -94,14 +95,8 @@ public class MethodMetadataTest {
 
   @Test
   public void testAnnotations() {
-    TypeElement typeElement = elements.getTypeElement("com.bdl.annotation.processing.model.AnnotatedMethodInterface");
-    ExecutableElement method = null;
-    for (Element element : typeElement.getEnclosedElements()) {
-      if (element.getSimpleName().toString().equals("annotatedSomething")) {
-        method = ((ExecutableElement) element);
-        break;
-      }
-    }
+    ExecutableElement method = getMethodElement(
+        "com.bdl.annotation.processing.model.AnnotatedMethodInterface", "annotatedSomething");
     Preconditions.checkNotNull(method, "No matching method found");
     MethodMetadata actual = MethodMetadata.fromMethod(method);
     assertThat(actual).isEqualTo(MethodMetadata.builder()
@@ -122,9 +117,25 @@ public class MethodMetadataTest {
   }
 
   @Test
+  public void testArrays() {
+    ExecutableElement method = getMethodElement("com.bdl.annotation.processing.model.MethodContainer", "arraysMethod");
+    Preconditions.checkNotNull(method, "No matching method found");
+    MethodMetadata actual = MethodMetadata.fromMethod(method);
+    assertThat(actual).isEqualTo(MethodMetadata.builder()
+        .setVisibility(Visibility.PUBLIC)
+        .setIsAbstract(true)
+        .setName("arraysMethod")
+        .setType(TypeMetadata.STRING.arrayOf())
+        .addParameter(ParameterMetadata.of(
+            TypeMetadata.INT.arrayOf().arrayOf(),
+            "inputs"))
+        .build());
+  }
+
+  @Test
   public void testParameterizedMethod() {
     MethodMetadata method = MethodMetadata.fromMethod(
-        (ExecutableElement) getMethodElement("com.bdl.annotation.processing.model.ComplexParameterized", "filter"));
+        getMethodElement("com.bdl.annotation.processing.model.ComplexParameterized", "filter"));
     TypeMetadata bType = TypeMetadata.builder()
         .setName("B")
         .addBound(TypeMetadata.builder()
@@ -163,7 +174,7 @@ public class MethodMetadataTest {
   @Test
   public void testTypeConversion() {
     MethodMetadata method = MethodMetadata.fromMethod(
-        (ExecutableElement) getMethodElement("com.bdl.annotation.processing.model.ComplexParameterized", "extend"));
+        getMethodElement("com.bdl.annotation.processing.model.ComplexParameterized", "extend"));
     MethodMetadata expected = MethodMetadata.builder()
         .setVisibility(Visibility.PUBLIC)
         .setIsAbstract(true)

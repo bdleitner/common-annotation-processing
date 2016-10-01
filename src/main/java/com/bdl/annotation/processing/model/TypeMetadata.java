@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.QualifiedNameable;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.NoType;
@@ -91,6 +92,9 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
   /** If {@code true}, the type is a Generic type parameter. */
   public abstract boolean isTypeParameter();
 
+  /** Returns the level of the array of this type.  Scalars are 0. */
+  abstract int arrayDepth();
+
   /** The names of any outer classes enclosing this type, from innermost to outermost. */
   public abstract ImmutableList<String> outerClassNames();
 
@@ -110,6 +114,10 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
         .compare(outerClassNames(), that.outerClassNames(), Comparators.forLists())
         .compare(packageName(), that.packageName())
         .result();
+  }
+
+  public boolean isArray() {
+    return arrayDepth() > 0;
   }
 
   public String packagePrefix() {
@@ -155,7 +163,14 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
           .map((type) -> type.reference(imports, false)) // do not recurse on bounds
           .collect(Collectors.joining(" & ")));
     }
+    for (int i = 0; i < arrayDepth(); i++) {
+      s.append("[]");
+    }
     return s.toString();
+  }
+
+  public TypeMetadata arrayOf() {
+    return toBuilder().toArray().build();
   }
 
   @Override
@@ -240,11 +255,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
   }
 
   TypeMetadata convertTypeParams(Map<String, String> paramNameMap) {
-    Builder builder = builder()
-        .setPackageName(packageName())
-        .setIsTypeParameter(isTypeParameter())
-        .setName(name());
-    builder.outerClassNamesBuilder().addAll(outerClassNames());
+    Builder builder = rawType().toBuilder();
 
     if (!isTypeParameter()) {
       for (TypeMetadata param : params()) {
@@ -262,16 +273,19 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     return builder.build();
   }
 
+  /**
+   * If {@code this} is a type parameter, removes any bounds, if present. Otherwise, removes
+   * any type parameters, if present.
+   */
   public TypeMetadata rawType() {
-    Preconditions.checkState(!isTypeParameter(), "Cannot take the raw type of type parameter %s", this);
-    if (params().isEmpty()) {
-      return this;
+    if (isTypeParameter()) {
+      return bounds().isEmpty()
+          ? this
+          : toBuilder().setBounds(ImmutableList.of()).build();
     }
-    Builder builder = builder()
-        .setPackageName(packageName())
-        .setName(name());
-    builder.outerClassNamesBuilder().addAll(outerClassNames());
-    return builder.build();
+    return params().isEmpty()
+        ? this
+        : toBuilder().setParams(ImmutableList.of()).build();
   }
 
   @Override
@@ -307,6 +321,9 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
   }
 
   private static TypeMetadata fromType(TypeMirror type, boolean withBounds) {
+    if (type.getKind() == TypeKind.ARRAY) {
+      return fromType(((ArrayType) type).getComponentType(), withBounds).arrayOf();
+    }
     Builder builder = builder().setName(getSimpleName(type));
 
     if (type.getKind() == TypeKind.WILDCARD) {
@@ -415,6 +432,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
   public static Builder builder() {
     return new AutoValue_TypeMetadata.Builder()
         .setPackageName("")
+        .setArrayDepth(0)
         .setIsTypeParameter(false);
   }
 
@@ -426,11 +444,17 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
 
     public abstract Builder setIsTypeParameter(boolean isTypeParameter);
 
+    abstract Builder setArrayDepth(int arrayDepth);
+
     abstract ImmutableList.Builder<String> outerClassNamesBuilder();
 
     public abstract Builder setName(String name);
 
+    abstract Builder setParams(ImmutableList<TypeMetadata> params);
+
     abstract ImmutableList.Builder<TypeMetadata> paramsBuilder();
+
+    abstract Builder setBounds(ImmutableList<TypeMetadata> params);
 
     abstract ImmutableList.Builder<TypeMetadata> boundsBuilder();
 
@@ -448,6 +472,13 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     public Builder addBound(TypeMetadata metadata) {
       setIsTypeParameter(true);
       boundsBuilder().add(metadata);
+      return this;
+    }
+
+    abstract int arrayDepth();
+
+    public Builder toArray() {
+      setArrayDepth(arrayDepth() + 1);
       return this;
     }
 

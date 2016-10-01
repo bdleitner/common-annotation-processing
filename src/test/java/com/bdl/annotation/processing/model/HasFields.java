@@ -15,4 +15,7 @@ public class HasFields {
   public int baz;
 
   long blargh = 5;
+
+  private String[] array;
+  private int[][][] threeDArray;
 }

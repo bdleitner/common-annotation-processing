@@ -2,6 +2,7 @@ package com.bdl.annotation.processing.model;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.testing.compile.CompilationRule;
 
@@ -11,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 
@@ -324,5 +326,43 @@ public class TypeMetadataTest {
     assertThat(type.reference(Imports.empty(), true))
         .isEqualTo("com.bdl.annotation.processing.model.ComplexParameterized<"
             + "A, B extends Comparable<B>, C extends java.util.List<B>>");
+  }
+
+  @Test
+  public void testArrayType() {
+    TypeElement hasFields = elements.getTypeElement("com.bdl.annotation.processing.model.HasFields");
+    Element field = null;
+    for (Element element : hasFields.getEnclosedElements()) {
+      if (element.getSimpleName().toString().equals("array")) {
+        field = element;
+        break;
+      }
+    }
+
+    Preconditions.checkState(field != null, "Unable to find field HasFields.array");
+    TypeMetadata type = TypeMetadata.fromType(field.asType());
+    assertThat(type).isEqualTo(TypeMetadata.STRING.arrayOf());
+
+    assertThat(type.reference(Imports.empty()))
+        .isEqualTo("String[]");
+  }
+
+  @Test
+  public void testMultipleArrayType() {
+    TypeElement hasFields = elements.getTypeElement("com.bdl.annotation.processing.model.HasFields");
+    Element field = null;
+    for (Element element : hasFields.getEnclosedElements()) {
+      if (element.getSimpleName().toString().equals("threeDArray")) {
+        field = element;
+        break;
+      }
+    }
+
+    Preconditions.checkState(field != null, "Unable to find field HasFields.threeDArray");
+    TypeMetadata type = TypeMetadata.fromType(field.asType());
+    assertThat(type).isEqualTo(
+        TypeMetadata.INT.arrayOf().arrayOf().arrayOf());
+    assertThat(type.reference(Imports.empty()))
+        .isEqualTo("int[][][]");
   }
 }
