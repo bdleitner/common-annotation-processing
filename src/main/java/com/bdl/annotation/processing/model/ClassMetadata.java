@@ -32,8 +32,10 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
     static Category forKind(ElementKind kind) {
       switch (kind) {
         case CLASS:
+        case ENUM:
           return Category.CLASS;
         case INTERFACE:
+        case ANNOTATION_TYPE:
           return Category.INTERFACE;
         default:
           throw new IllegalArgumentException("Bad Kind: " + kind);
