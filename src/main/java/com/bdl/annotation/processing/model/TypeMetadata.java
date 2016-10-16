@@ -133,6 +133,13 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     return prefix.isEmpty() ? "" : prefix + delimiter;
   }
 
+  public String fullyQualifiedPathName() {
+    return String.format("%s%s%s",
+        packagePrefix(),
+        nestingPrefix(),
+        name());
+  }
+
   public String toString(Imports imports) {
     return toString(imports, false);
   }
