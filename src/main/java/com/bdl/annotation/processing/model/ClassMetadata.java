@@ -4,10 +4,6 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -15,6 +11,9 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Metadata class for a relevant parts of a class to write.
@@ -70,9 +69,11 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
   public Set<TypeMetadata> getAllTypes() {
     ImmutableSet.Builder<TypeMetadata> imports = ImmutableSet.builder();
     imports.addAll(type().getAllTypes());
-    imports.addAll(inheritances().stream()
-        .map((inheritance) -> inheritance.classMetadata().type())
-        .collect(Collectors.toSet()));
+    imports.addAll(
+        inheritances()
+            .stream()
+            .map((inheritance) -> inheritance.classMetadata().type())
+            .collect(Collectors.toSet()));
     for (AnnotationMetadata annotation : annotations()) {
       imports.addAll(annotation.getAllTypes());
     }
@@ -89,10 +90,13 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
     if (allFields == null) {
       Stream<FieldMetadata> fieldStream = Stream.empty();
       for (InheritanceMetadata inheritance : inheritances()) {
-        fieldStream = Stream.concat(
-            fieldStream,
-            inheritance.getAllFields().stream()
-                .filter((field) -> field.visibility() != Visibility.PRIVATE));
+        fieldStream =
+            Stream.concat(
+                fieldStream,
+                inheritance
+                    .getAllFields()
+                    .stream()
+                    .filter((field) -> field.visibility() != Visibility.PRIVATE));
       }
 
       fieldStream = Stream.concat(fieldStream, fields().stream());
@@ -107,31 +111,36 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
     if (allMethods == null) {
       Stream<MethodMetadata> methodStream = Stream.empty();
       for (InheritanceMetadata inheritance : inheritances()) {
-        methodStream = Stream.concat(
-            methodStream,
-            inheritance.getAllMethods().stream()
-                .filter((method) -> method.visibility() != Visibility.PRIVATE));
+        methodStream =
+            Stream.concat(
+                methodStream,
+                inheritance
+                    .getAllMethods()
+                    .stream()
+                    .filter((method) -> method.visibility() != Visibility.PRIVATE));
       }
 
       methodStream = Stream.concat(methodStream, methods().stream());
 
       Set<MethodMetadata> methods = methodStream.collect(Collectors.toSet());
 
-      Set<MethodMetadata> concreteMethods = methods.stream()
-          .filter((method) -> !method.isAbstract())
-          .collect(Collectors.toSet());
+      Set<MethodMetadata> concreteMethods =
+          methods.stream().filter((method) -> !method.isAbstract()).collect(Collectors.toSet());
 
-      Set<MethodMetadata> abstractMethods = methods.stream()
-          .filter(MethodMetadata::isAbstract)
-          .filter((method) -> !concreteMethods.contains(method.toBuilder().setIsAbstract(false).build()))
-          .collect(Collectors.toSet());
+      Set<MethodMetadata> abstractMethods =
+          methods
+              .stream()
+              .filter(MethodMetadata::isAbstract)
+              .filter(
+                  (method) ->
+                      !concreteMethods.contains(method.toBuilder().setIsAbstract(false).build()))
+              .collect(Collectors.toSet());
 
-      allMethods = ImmutableList.copyOf(
-          Stream.concat(
-              concreteMethods.stream(),
-              abstractMethods.stream())
-              .sorted()
-              .collect(Collectors.toList()));
+      allMethods =
+          ImmutableList.copyOf(
+              Stream.concat(concreteMethods.stream(), abstractMethods.stream())
+                  .sorted()
+                  .collect(Collectors.toList()));
     }
     return allMethods;
   }
@@ -147,9 +156,7 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
 
   public static ClassMetadata fromElement(Element element) {
     TypeMetadata type = TypeMetadata.fromElement(element);
-    Builder metadata = builder()
-        .setCategory(Category.forKind(element.getKind()))
-        .setType(type);
+    Builder metadata = builder().setCategory(Category.forKind(element.getKind())).setType(type);
 
     for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
       metadata.addAnnotation(AnnotationMetadata.fromType(annotationMirror));
@@ -184,7 +191,7 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
   }
 
   @AutoValue.Builder
-  public static abstract class Builder {
+  public abstract static class Builder {
     abstract ImmutableList.Builder<AnnotationMetadata> annotationsBuilder();
 
     public abstract Builder setCategory(Category category);

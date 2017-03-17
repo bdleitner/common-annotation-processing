@@ -11,6 +11,7 @@ import com.google.auto.value.AutoValue;
 public abstract class ValueMetadata {
 
   public abstract TypeMetadata type();
+
   public abstract String value();
 
   public static ValueMetadata create(TypeMetadata type, String value) {
@@ -18,8 +19,6 @@ public abstract class ValueMetadata {
   }
 
   public static ValueMetadata create(Object object) {
-    return new AutoValue_ValueMetadata(
-        TypeMetadata.fromObject(object),
-        object.toString());
+    return new AutoValue_ValueMetadata(TypeMetadata.fromObject(object), object.toString());
   }
 }

@@ -4,14 +4,13 @@ import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
-import java.util.Comparator;
-import java.util.Set;
-
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
+import java.util.Comparator;
+import java.util.Set;
 
 /**
  * Metadata for a field within a class.
@@ -21,9 +20,8 @@ import javax.lang.model.element.Modifier;
 @AutoValue
 public abstract class FieldMetadata implements Annotatable, Comparable<FieldMetadata>, UsesTypes {
 
-  private static final Comparator<FieldMetadata> COMPARATOR = Comparator
-      .comparing(FieldMetadata::visibility)
-      .thenComparing(FieldMetadata::name);
+  private static final Comparator<FieldMetadata> COMPARATOR =
+      Comparator.comparing(FieldMetadata::visibility).thenComparing(FieldMetadata::name);
 
   public abstract TypeMetadata containingClass();
 
@@ -46,7 +44,8 @@ public abstract class FieldMetadata implements Annotatable, Comparable<FieldMeta
   }
 
   public String toString(Imports imports) {
-    return String.format("%s%s%s%s %s",
+    return String.format(
+        "%s%s%s%s %s",
         visibility().prefix(),
         isStatic() ? "static " : "",
         isFinal() ? "final " : "",
@@ -71,17 +70,20 @@ public abstract class FieldMetadata implements Annotatable, Comparable<FieldMeta
   }
 
   static FieldMetadata from(@Nullable TypeMetadata containingClass, Element element) {
-    Preconditions.checkArgument(element.getKind() == ElementKind.FIELD,
-        "element %s is not a field (has kind %s)", element, element.getKind());
+    Preconditions.checkArgument(
+        element.getKind() == ElementKind.FIELD,
+        "element %s is not a field (has kind %s)",
+        element,
+        element.getKind());
     if (containingClass == null) {
       containingClass = TypeMetadata.fromElement(element.getEnclosingElement());
     }
-    Builder field = builder()
-        .containingClass(containingClass);
+    Builder field = builder().containingClass(containingClass);
     for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
       field.addAnnotation(AnnotationMetadata.fromType(annotation));
     }
-    field.visibility(Visibility.forElement(element))
+    field
+        .visibility(Visibility.forElement(element))
         .name(element.getSimpleName().toString())
         .type(TypeMetadata.fromType(element.asType()));
     Set<Modifier> modifiers = element.getModifiers();
@@ -95,9 +97,7 @@ public abstract class FieldMetadata implements Annotatable, Comparable<FieldMeta
   }
 
   public static Builder builder() {
-    return new AutoValue_FieldMetadata.Builder()
-        .isStatic(false)
-        .isFinal(false);
+    return new AutoValue_FieldMetadata.Builder().isStatic(false).isFinal(false);
   }
 
   @AutoValue.Builder

@@ -4,14 +4,13 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import javax.annotation.Nullable;
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.ExecutableElement;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Encapsulation of Metadata information for an Annotation reference.
@@ -48,14 +47,16 @@ public abstract class AnnotationMetadata implements UsesTypes {
       return s.toString();
     }
     s.append("(");
-    if (values().size() == 1
-        && values().get("value") != null) {
+    if (values().size() == 1 && values().get("value") != null) {
       // a single value with name "value" so we don't need the method name.
       s.append("\"").append(values().get("value").value()).append("\"");
     } else {
-      s.append(values().entrySet().stream()
-          .map(entry -> String.format("%s = \"%s\"", entry.getKey(), entry.getValue()))
-          .collect(Collectors.joining(", ")));
+      s.append(
+          values()
+              .entrySet()
+              .stream()
+              .map(entry -> String.format("%s = \"%s\"", entry.getKey(), entry.getValue()))
+              .collect(Collectors.joining(", ")));
     }
     s.append(")");
     return s.toString();
@@ -64,8 +65,8 @@ public abstract class AnnotationMetadata implements UsesTypes {
   public static AnnotationMetadata fromType(AnnotationMirror mirror) {
     Builder metadata = AnnotationMetadata.builder();
     metadata.setType(TypeMetadata.fromType(mirror.getAnnotationType()));
-    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry
-        : mirror.getElementValues().entrySet()) {
+    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry :
+        mirror.getElementValues().entrySet()) {
       MethodMetadata method = MethodMetadata.fromMethod(entry.getKey());
       metadata.putValue(
           method.name(),
@@ -81,6 +82,7 @@ public abstract class AnnotationMetadata implements UsesTypes {
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder setType(TypeMetadata type);
+
     abstract ImmutableMap.Builder<String, ValueMetadata> valuesBuilder();
 
     public Builder putValue(String methodName, ValueMetadata object) {

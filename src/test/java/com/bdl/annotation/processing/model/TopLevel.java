@@ -10,8 +10,6 @@ class TopLevel {
 
   static class Outer {
 
-    static class Inner {
-
-    }
+    static class Inner {}
   }
 }

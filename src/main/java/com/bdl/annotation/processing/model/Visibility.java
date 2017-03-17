@@ -1,9 +1,8 @@
 package com.bdl.annotation.processing.model;
 
-import java.util.Set;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
+import java.util.Set;
 
 /**
  * Enumeration of possible visibilities.

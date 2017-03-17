@@ -1,8 +1,6 @@
 package com.bdl.annotation.processing.model;
 
-/**
- * @author Ben Leitner
- */
+/** @author Ben Leitner */
 interface OtherSimple {
 
   String blorp(String input);

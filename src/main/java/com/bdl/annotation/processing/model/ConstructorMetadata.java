@@ -6,13 +6,12 @@ import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Encapsulation of constructor metadata.
@@ -51,28 +50,30 @@ public abstract class ConstructorMetadata implements Comparable<ConstructorMetad
   }
 
   public String toString(Imports imports) {
-    return String.format("%s%s(%s)",
+    return String.format(
+        "%s%s(%s)",
         visibility().prefix(),
         type().name(),
-        parameters().stream()
+        parameters()
+            .stream()
             .map((param) -> param.toString(imports))
             .collect(Collectors.joining(", ")));
   }
 
   public static ConstructorMetadata fromConstructor(Element element) {
-    Preconditions.checkArgument(element.getKind() == ElementKind.CONSTRUCTOR,
-        "Element %s is not a constructor.", element);
+    Preconditions.checkArgument(
+        element.getKind() == ElementKind.CONSTRUCTOR, "Element %s is not a constructor.", element);
 
     ExecutableElement executable = (ExecutableElement) element;
-    Builder constructor = builder()
-        .visibility(Visibility.forElement(element))
-        .type(TypeMetadata.fromElement(element.getEnclosingElement()));
+    Builder constructor =
+        builder()
+            .visibility(Visibility.forElement(element))
+            .type(TypeMetadata.fromElement(element.getEnclosingElement()));
 
     for (VariableElement parameter : executable.getParameters()) {
       constructor.addParameter(
           ParameterMetadata.of(
-              TypeMetadata.fromType(parameter.asType()),
-              parameter.getSimpleName().toString()));
+              TypeMetadata.fromType(parameter.asType()), parameter.getSimpleName().toString()));
     }
 
     return constructor.build();
@@ -85,6 +86,7 @@ public abstract class ConstructorMetadata implements Comparable<ConstructorMetad
   @AutoValue.Builder
   public abstract static class Builder {
     public abstract Builder type(TypeMetadata type);
+
     public abstract Builder visibility(Visibility visibility);
 
     abstract ImmutableList.Builder<ParameterMetadata> parametersBuilder();

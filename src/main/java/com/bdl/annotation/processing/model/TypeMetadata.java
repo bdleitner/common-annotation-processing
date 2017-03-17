@@ -7,13 +7,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.QualifiedNameable;
@@ -27,6 +20,12 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.WildcardType;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Encapsulation of Metadata information for a Type reference.
@@ -36,54 +35,27 @@ import javax.lang.model.type.WildcardType;
 @AutoValue
 public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata> {
 
-  public static final TypeMetadata VOID = builder()
-      .setName("void")
-      .build();
-  public static final TypeMetadata INT = builder()
-      .setName("int")
-      .build();
-  public static final TypeMetadata LONG = builder()
-      .setName("long")
-      .build();
-  public static final TypeMetadata DOUBLE = builder()
-      .setName("double")
-      .build();
-  public static final TypeMetadata BOOLEAN = builder()
-      .setName("boolean")
-      .build();
-  public static final TypeMetadata BOXED_VOID = builder()
-      .setPackageName("java.lang")
-      .setName("Void")
-      .build();
-  public static final TypeMetadata BOXED_INTEGER = builder()
-      .setPackageName("java.lang")
-      .setName("Integer")
-      .build();
-  public static final TypeMetadata BOXED_LONG = builder()
-      .setPackageName("java.lang")
-      .setName("Long")
-      .build();
-  public static final TypeMetadata BOXED_DOUBLE = builder()
-      .setPackageName("java.lang")
-      .setName("Double")
-      .build();
-  public static final TypeMetadata BOXED_BOOLEAN = builder()
-      .setPackageName("java.lang")
-      .setName("Boolean")
-      .build();
-  public static final TypeMetadata STRING = builder()
-      .setPackageName("java.lang")
-      .setName("String")
-      .build();
-  public static final TypeMetadata OBJECT = builder()
-      .setPackageName("java.lang")
-      .setName("Object")
-      .build();
-  public static final TypeMetadata CLASS = builder()
-      .setPackageName("java.lang")
-      .setName("Class")
-      .addParam(simpleTypeParam("?"))
-      .build();
+  public static final TypeMetadata VOID = builder().setName("void").build();
+  public static final TypeMetadata INT = builder().setName("int").build();
+  public static final TypeMetadata LONG = builder().setName("long").build();
+  public static final TypeMetadata DOUBLE = builder().setName("double").build();
+  public static final TypeMetadata BOOLEAN = builder().setName("boolean").build();
+  public static final TypeMetadata BOXED_VOID =
+      builder().setPackageName("java.lang").setName("Void").build();
+  public static final TypeMetadata BOXED_INTEGER =
+      builder().setPackageName("java.lang").setName("Integer").build();
+  public static final TypeMetadata BOXED_LONG =
+      builder().setPackageName("java.lang").setName("Long").build();
+  public static final TypeMetadata BOXED_DOUBLE =
+      builder().setPackageName("java.lang").setName("Double").build();
+  public static final TypeMetadata BOXED_BOOLEAN =
+      builder().setPackageName("java.lang").setName("Boolean").build();
+  public static final TypeMetadata STRING =
+      builder().setPackageName("java.lang").setName("String").build();
+  public static final TypeMetadata OBJECT =
+      builder().setPackageName("java.lang").setName("Object").build();
+  public static final TypeMetadata CLASS =
+      builder().setPackageName("java.lang").setName("Class").addParam(simpleTypeParam("?")).build();
   private ImmutableSet<TypeMetadata> imports;
 
   /** The package in which the type lives. */
@@ -92,7 +64,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
   /** If {@code true}, the type is a Generic type parameter. */
   public abstract boolean isTypeParameter();
 
-  /** Returns the level of the array of this type.  Scalars are 0. */
+  /** Returns the level of the array of this type. Scalars are 0. */
   abstract int arrayDepth();
 
   /** The names of any outer classes enclosing this type, from innermost to outermost. */
@@ -134,10 +106,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
   }
 
   public String fullyQualifiedPathName() {
-    return String.format("%s%s%s",
-        packagePrefix(),
-        nestingPrefix(),
-        name());
+    return String.format("%s%s%s", packagePrefix(), nestingPrefix(), name());
   }
 
   public String toString(Imports imports) {
@@ -159,16 +128,20 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     }
     if (!params().isEmpty()) {
       s.append("<");
-      s.append(params().stream()
-          .map((type) -> type.toString(imports, withBounds))
-          .collect(Collectors.joining(", ")));
+      s.append(
+          params()
+              .stream()
+              .map((type) -> type.toString(imports, withBounds))
+              .collect(Collectors.joining(", ")));
       s.append(">");
     }
     if (withBounds && !bounds().isEmpty()) {
       s.append(" extends ");
-      s.append(bounds().stream()
-          .map((type) -> type.toString(imports, false)) // do not recurse on bounds
-          .collect(Collectors.joining(" & ")));
+      s.append(
+          bounds()
+              .stream()
+              .map((type) -> type.toString(imports, false)) // do not recurse on bounds
+              .collect(Collectors.joining(" & ")));
     }
     for (int i = 0; i < arrayDepth(); i++) {
       s.append("[]");
@@ -241,7 +214,8 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
 
   TypeMetadata convertTypeParams(List<TypeMetadata> newParams) {
     if (!isTypeParameter()) {
-      Preconditions.checkArgument(newParams.size() == params().size(),
+      Preconditions.checkArgument(
+          newParams.size() == params().size(),
           "Cannot convert %s to using type params <%s>, the number of params does not match.",
           toString(Imports.empty()),
           newParams.stream().map(TypeMetadata::name).collect(Collectors.joining(", ")));
@@ -253,7 +227,8 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
       }
       return convertTypeParams(paramNameMapBuilder.build());
     } else {
-      Preconditions.checkArgument(newParams.size() == 1,
+      Preconditions.checkArgument(
+          newParams.size() == 1,
           "Cannot convert %s to type params <%s>, exactly 1 type parameter is required.",
           toString(Imports.empty()),
           newParams.stream().map(TypeMetadata::name).collect(Collectors.joining(", ")));
@@ -281,18 +256,14 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
   }
 
   /**
-   * If {@code this} is a type parameter, removes any bounds, if present. Otherwise, removes
-   * any type parameters, if present.
+   * If {@code this} is a type parameter, removes any bounds, if present. Otherwise, removes any
+   * type parameters, if present.
    */
   public TypeMetadata rawType() {
     if (isTypeParameter()) {
-      return bounds().isEmpty()
-          ? this
-          : toBuilder().setBounds(ImmutableList.of()).build();
+      return bounds().isEmpty() ? this : toBuilder().setBounds(ImmutableList.of()).build();
     }
-    return params().isEmpty()
-        ? this
-        : toBuilder().setParams(ImmutableList.of()).build();
+    return params().isEmpty() ? this : toBuilder().setParams(ImmutableList.of()).build();
   }
 
   @Override
@@ -313,8 +284,8 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
         || type instanceof WildcardType) {
       return type.toString();
     }
-    throw new IllegalArgumentException(String.format("Cannot determine name for type: %s (%s)",
-        type, type.getClass()));
+    throw new IllegalArgumentException(
+        String.format("Cannot determine name for type: %s (%s)", type, type.getClass()));
   }
 
   private static String getQualifiedName(TypeMirror type) {
@@ -347,7 +318,6 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
               continue;
             }
             builder.addBound(fromType(bound, false));
-
           }
         } else {
           if (!getQualifiedName(upperBound).equals("java.lang.Object")) {
@@ -392,9 +362,7 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
   private static TypeMetadata from(Type type, boolean includeParams) {
     if (type instanceof java.lang.reflect.TypeVariable) {
       java.lang.reflect.TypeVariable typeVar = (java.lang.reflect.TypeVariable) type;
-      Builder metadata = builder()
-          .setIsTypeParameter(true)
-          .setName(typeVar.getName());
+      Builder metadata = builder().setIsTypeParameter(true).setName(typeVar.getName());
       for (Type bound : typeVar.getBounds()) {
         if (bound.equals(Object.class)) {
           continue;
@@ -416,16 +384,18 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     }
     Preconditions.checkArgument(type instanceof Class);
     Class<?> clazz = (Class<?>) type;
-    Builder metadata = TypeMetadata.builder()
-        .setPackageName(clazz.getPackage().getName())
-        .setName(clazz.getSimpleName());
+    Builder metadata =
+        TypeMetadata.builder()
+            .setPackageName(clazz.getPackage().getName())
+            .setName(clazz.getSimpleName());
     Class<?> enclosing = clazz.getEnclosingClass();
     while (enclosing != null) {
       metadata.addOuterClass(enclosing.getSimpleName());
       enclosing = enclosing.getEnclosingClass();
     }
     if (includeParams) {
-      for (java.lang.reflect.TypeVariable<? extends Class<?>> variable : clazz.getTypeParameters()) {
+      for (java.lang.reflect.TypeVariable<? extends Class<?>> variable :
+          clazz.getTypeParameters()) {
         metadata.addParam(from(variable, true));
       }
     }
@@ -494,18 +464,23 @@ public abstract class TypeMetadata implements UsesTypes, Comparable<TypeMetadata
     public TypeMetadata build() {
       TypeMetadata metadata = autoBuild();
       if (metadata.isTypeParameter()) {
-        Preconditions.checkState(metadata.params().isEmpty(),
+        Preconditions.checkState(
+            metadata.params().isEmpty(),
             "Type parameters given for type-parameter: %s",
             metadata.toString(Imports.empty()));
-        Preconditions.checkState(metadata.outerClassNames().isEmpty(),
+        Preconditions.checkState(
+            metadata.outerClassNames().isEmpty(),
             "Nesting classes given type-parameter: %s",
             metadata.toString(Imports.empty()));
-        Preconditions.checkState(metadata.packageName().isEmpty(),
+        Preconditions.checkState(
+            metadata.packageName().isEmpty(),
             "Nonempty package given for type-parameter: %s",
             metadata.toString(Imports.empty()));
       } else {
-        Preconditions.checkState(metadata.bounds().isEmpty(),
-            "Bounds given for non-type-parameter: %s", metadata.toString(Imports.empty()));
+        Preconditions.checkState(
+            metadata.bounds().isEmpty(),
+            "Bounds given for non-type-parameter: %s",
+            metadata.toString(Imports.empty()));
       }
       return metadata;
     }

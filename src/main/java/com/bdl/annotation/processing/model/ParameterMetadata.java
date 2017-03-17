@@ -14,13 +14,14 @@ import java.util.function.Function;
  */
 @AutoValue
 public abstract class ParameterMetadata implements UsesTypes {
-  static final Comparator<ImmutableList<ParameterMetadata>> IMMUTABLE_LIST_COMPARATOR
-      = Comparators.forLists(new Function<ParameterMetadata, TypeMetadata>() {
-    @Override
-    public TypeMetadata apply(ParameterMetadata input) {
-      return input.type();
-    }
-  });
+  static final Comparator<ImmutableList<ParameterMetadata>> IMMUTABLE_LIST_COMPARATOR =
+      Comparators.forLists(
+          new Function<ParameterMetadata, TypeMetadata>() {
+            @Override
+            public TypeMetadata apply(ParameterMetadata input) {
+              return input.type();
+            }
+          });
 
   private String name;
 
@@ -47,8 +48,6 @@ public abstract class ParameterMetadata implements UsesTypes {
   }
 
   public String toString(Imports imports) {
-    return String.format("%s %s",
-        type().toString(imports),
-        name());
+    return String.format("%s %s", type().toString(imports), name());
   }
 }

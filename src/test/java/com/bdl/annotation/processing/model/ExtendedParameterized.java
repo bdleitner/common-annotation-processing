@@ -1,7 +1,8 @@
 package com.bdl.annotation.processing.model;
 
 /**
- * A parameterized interface that extends another parameterized interface with a different type param.
+ * A parameterized interface that extends another parameterized interface with a different type
+ * param.
  *
  * @author Ben Leitner
  */

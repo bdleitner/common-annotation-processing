@@ -6,5 +6,4 @@ package com.bdl.annotation.processing.model;
  * @author Ben Leitner
  */
 @SuppressWarnings("unused") // Used via compiler element search in TypeMetadataTest.
-public interface ParameterizedMultibound<S, T extends Simple & Parameterized<S>> {
-}
+public interface ParameterizedMultibound<S, T extends Simple & Parameterized<S>> {}

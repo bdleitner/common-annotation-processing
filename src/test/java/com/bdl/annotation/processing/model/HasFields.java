@@ -11,8 +11,7 @@ public class HasFields {
   private String foo;
   protected Object bar;
 
-  @SomeAnnotation
-  public static int baz;
+  @SomeAnnotation public static int baz;
 
   final long blargh = 5;
 

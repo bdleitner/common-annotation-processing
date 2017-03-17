@@ -1,9 +1,6 @@
 package com.bdl.annotation.processing.model;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import com.google.testing.compile.CompilationRule;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,6 +10,8 @@ import org.junit.runners.JUnit4;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
+
+import static com.google.common.truth.Truth.assertThat;
 
 /**
  * Tests for the FieldMetadata class.
@@ -42,67 +41,73 @@ public class FieldMetadataTest {
 
   @Test
   public void testFromElement() {
-    TypeElement typeElement = elements.getTypeElement("com.bdl.annotation.processing.model.HasFields");
+    TypeElement typeElement =
+        elements.getTypeElement("com.bdl.annotation.processing.model.HasFields");
 
     Element foo = getElement(typeElement, "foo");
     FieldMetadata field = FieldMetadata.from(foo);
-    TypeMetadata hasFieldsType = TypeMetadata.builder()
-        .setPackageName("com.bdl.annotation.processing.model")
-        .setName("HasFields")
-        .build();
-    assertThat(field).isEqualTo(
-        FieldMetadata.builder()
-            .containingClass(hasFieldsType)
-            .visibility(Visibility.PRIVATE)
-            .name("foo")
-            .type(TypeMetadata.STRING)
-            .build());
+    TypeMetadata hasFieldsType =
+        TypeMetadata.builder()
+            .setPackageName("com.bdl.annotation.processing.model")
+            .setName("HasFields")
+            .build();
+    assertThat(field)
+        .isEqualTo(
+            FieldMetadata.builder()
+                .containingClass(hasFieldsType)
+                .visibility(Visibility.PRIVATE)
+                .name("foo")
+                .type(TypeMetadata.STRING)
+                .build());
 
     Element bar = getElement(typeElement, "bar");
     field = FieldMetadata.from(bar);
-    assertThat(field).isEqualTo(
-        FieldMetadata.builder()
-            .containingClass(hasFieldsType)
-            .visibility(Visibility.PROTECTED)
-            .name("bar")
-            .type(TypeMetadata.OBJECT)
-            .build());
+    assertThat(field)
+        .isEqualTo(
+            FieldMetadata.builder()
+                .containingClass(hasFieldsType)
+                .visibility(Visibility.PROTECTED)
+                .name("bar")
+                .type(TypeMetadata.OBJECT)
+                .build());
 
     Element baz = getElement(typeElement, "baz");
     field = FieldMetadata.from(baz);
-    assertThat(field).isEqualTo(
-        FieldMetadata.builder()
-            .containingClass(hasFieldsType)
-            .addAnnotation(AnnotationMetadata.builder()
-                .setType(TestingTypes.SOME_ANNOTATION)
-                .build())
-            .visibility(Visibility.PUBLIC)
-            .isStatic(true)
-            .name("baz")
-            .type(TypeMetadata.INT)
-            .build());
+    assertThat(field)
+        .isEqualTo(
+            FieldMetadata.builder()
+                .containingClass(hasFieldsType)
+                .addAnnotation(
+                    AnnotationMetadata.builder().setType(TestingTypes.SOME_ANNOTATION).build())
+                .visibility(Visibility.PUBLIC)
+                .isStatic(true)
+                .name("baz")
+                .type(TypeMetadata.INT)
+                .build());
 
     Element blargh = getElement(typeElement, "blargh");
     field = FieldMetadata.from(blargh);
-    assertThat(field).isEqualTo(
-        FieldMetadata.builder()
-            .containingClass(hasFieldsType)
-            .visibility(Visibility.PACKAGE_LOCAL)
-            .isFinal(true)
-            .name("blargh")
-            .type(TypeMetadata.LONG)
-            .build());
+    assertThat(field)
+        .isEqualTo(
+            FieldMetadata.builder()
+                .containingClass(hasFieldsType)
+                .visibility(Visibility.PACKAGE_LOCAL)
+                .isFinal(true)
+                .name("blargh")
+                .type(TypeMetadata.LONG)
+                .build());
 
     Element threeDArray = getElement(typeElement, "threeDArray");
     field = FieldMetadata.from(threeDArray);
-    assertThat(field).isEqualTo(
-        FieldMetadata.builder()
-            .containingClass(hasFieldsType)
-            .visibility(Visibility.PRIVATE)
-            .isStatic(true)
-            .isFinal(true)
-            .name("threeDArray")
-            .type(TypeMetadata.INT.arrayOf().arrayOf().arrayOf())
-            .build());
+    assertThat(field)
+        .isEqualTo(
+            FieldMetadata.builder()
+                .containingClass(hasFieldsType)
+                .visibility(Visibility.PRIVATE)
+                .isStatic(true)
+                .isFinal(true)
+                .name("threeDArray")
+                .type(TypeMetadata.INT.arrayOf().arrayOf().arrayOf())
+                .build());
   }
 }

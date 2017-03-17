@@ -30,7 +30,8 @@ class Comparators {
   }
 
   /** Comparator for lists of comparable things. */
-  public static <I, O extends Comparable<O>, T extends List<I>> Comparator<T> forLists(Function<I, O> function) {
+  public static <I, O extends Comparable<O>, T extends List<I>> Comparator<T> forLists(
+      Function<I, O> function) {
     return (first, second) -> {
       ComparisonChain chain = ComparisonChain.start();
       chain = chain.compare(first.size(), second.size());

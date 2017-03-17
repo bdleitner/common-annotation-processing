@@ -5,12 +5,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 
 /**
  * Encapsulation of metadata from the inheritance of an abstract class or interface.
@@ -36,14 +35,20 @@ public abstract class InheritanceMetadata implements UsesTypes {
   ImmutableList<FieldMetadata> getAllFields() {
     if (allFields == null) {
       final Map<String, String> paramNamesMap = getParamNamesMap();
-      allFields = ImmutableList.copyOf(
-          classMetadata().getAllFields()
-              .stream()
-              .map(input -> input.toBuilder()
-                  .containingClass(input.containingClass().convertTypeParams(paramNamesMap))
-                  .type(input.type().convertTypeParams(paramNamesMap))
-                  .build())
-              .collect(Collectors.toList()));
+      allFields =
+          ImmutableList.copyOf(
+              classMetadata()
+                  .getAllFields()
+                  .stream()
+                  .map(
+                      input ->
+                          input
+                              .toBuilder()
+                              .containingClass(
+                                  input.containingClass().convertTypeParams(paramNamesMap))
+                              .type(input.type().convertTypeParams(paramNamesMap))
+                              .build())
+                  .collect(Collectors.toList()));
     }
     return allFields;
   }
@@ -51,11 +56,13 @@ public abstract class InheritanceMetadata implements UsesTypes {
   ImmutableList<MethodMetadata> getAllMethods() {
     if (allMethods == null) {
       final Map<String, String> paramNamesMap = getParamNamesMap();
-      allMethods = ImmutableList.copyOf(
-          classMetadata().getAllMethods()
-              .stream()
-              .map(input -> input.convertTypeParameters(paramNamesMap))
-              .collect(Collectors.toList()));
+      allMethods =
+          ImmutableList.copyOf(
+              classMetadata()
+                  .getAllMethods()
+                  .stream()
+                  .map(input -> input.convertTypeParameters(paramNamesMap))
+                  .collect(Collectors.toList()));
     }
     return allMethods;
   }
@@ -90,7 +97,8 @@ public abstract class InheritanceMetadata implements UsesTypes {
     abstract Builder setClassMetadata(ClassMetadata classMetadata);
 
     Builder addInheritanceParam(TypeMetadata type) {
-      Preconditions.checkArgument(type.isTypeParameter(),
+      Preconditions.checkArgument(
+          type.isTypeParameter(),
           "Inheritance type params must be type parameters, was %s",
           type.toString(Imports.empty(), true));
       inheritanceParamsBuilder().add(type);
@@ -105,7 +113,9 @@ public abstract class InheritanceMetadata implements UsesTypes {
           metadata.inheritanceParams().size() == metadata.classMetadata().type().params().size(),
           "Cannot inherit %s with type params <%s>, the sizes do not match.",
           metadata.classMetadata().type().toString(Imports.empty(), true),
-          metadata.inheritanceParams().stream()
+          metadata
+              .inheritanceParams()
+              .stream()
               .map(TypeMetadata::toString)
               .collect(Collectors.joining(", ")));
 

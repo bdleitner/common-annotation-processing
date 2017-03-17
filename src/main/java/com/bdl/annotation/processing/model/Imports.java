@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Container of imports used that allows for obtaining needed import statements and
- * for determining when FQPN are needed in type references.
+ * Container of imports used that allows for obtaining needed import statements and for determining
+ * when FQPN are needed in type references.
  *
  * @author Ben Leitner
  */
@@ -56,15 +56,14 @@ public class Imports {
     return multimap.build();
   }
 
-  private static Map<TypeMetadata, ReferenceType> createReferenceMap(Multimap<String, TypeMetadata> namesToTypes) {
+  private static Map<TypeMetadata, ReferenceType> createReferenceMap(
+      Multimap<String, TypeMetadata> namesToTypes) {
     ImmutableMap.Builder<TypeMetadata, ReferenceType> referenceMap = ImmutableMap.builder();
     Map<String, Collection<TypeMetadata>> map = namesToTypes.asMap();
     for (Map.Entry<String, Collection<TypeMetadata>> entry : map.entrySet()) {
       if (entry.getValue().size() == 1) {
         TypeMetadata type = Iterables.getOnlyElement(entry.getValue());
-        referenceMap.put(
-            type.rawType(),
-            ReferenceType.NAME_ONLY);
+        referenceMap.put(type.rawType(), ReferenceType.NAME_ONLY);
         continue;
       }
       // TODO: improve collision handling.
@@ -79,8 +78,8 @@ public class Imports {
     return type.isTypeParameter()
         || type.packageName().equals("java.lang")
         || (type.packageName().isEmpty()
-        && type.nestingPrefix().isEmpty()
-        && type.name().equals(type.name().toLowerCase()));
+            && type.nestingPrefix().isEmpty()
+            && type.name().equals(type.name().toLowerCase()));
   }
 
   public List<String> getImports() {
@@ -95,7 +94,8 @@ public class Imports {
           // No import, FQPN must be used.
           break;
         case NESTED_NAME:
-          imports.add(packagePrefix(type) + type.outerClassNames().get(type.outerClassNames().size() - 1));
+          imports.add(
+              packagePrefix(type) + type.outerClassNames().get(type.outerClassNames().size() - 1));
           break;
         case NAME_ONLY:
           imports.add(packagePrefix(type) + type.nestingPrefix() + type.name());
@@ -107,9 +107,7 @@ public class Imports {
   }
 
   private String packagePrefix(TypeMetadata type) {
-    return type.packageName().isEmpty()
-        ? ""
-        : type.packageName() + ".";
+    return type.packageName().isEmpty() ? "" : type.packageName() + ".";
   }
 
   public ReferenceType reference(TypeMetadata type) {
@@ -117,13 +115,9 @@ public class Imports {
       return ReferenceType.NAME_ONLY;
     }
     if (type.packageName().equals(packageName)) {
-      return type.outerClassNames().isEmpty()
-          ? ReferenceType.NAME_ONLY
-          : ReferenceType.NESTED_NAME;
+      return type.outerClassNames().isEmpty() ? ReferenceType.NAME_ONLY : ReferenceType.NESTED_NAME;
     }
     ReferenceType referenceType = referenceMap.get(type.rawType());
-    return referenceType == null
-        ? ReferenceType.FULLY_QUALIFIED_PATH_NAME
-        : referenceType;
+    return referenceType == null ? ReferenceType.FULLY_QUALIFIED_PATH_NAME : referenceType;
   }
 }

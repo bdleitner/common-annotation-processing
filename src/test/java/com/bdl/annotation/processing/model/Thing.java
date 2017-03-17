@@ -7,6 +7,7 @@ import com.google.auto.value.AutoValue;
 public abstract class Thing {
 
   public abstract int anInt();
+
   public abstract String aString();
 
   public static Builder builder() {
@@ -14,8 +15,9 @@ public abstract class Thing {
   }
 
   @AutoValue.Builder
-  public static abstract class Builder {
+  public abstract static class Builder {
     public abstract Builder anInt(int anInt);
+
     public abstract Builder aString(String aString);
 
     public abstract Thing build();

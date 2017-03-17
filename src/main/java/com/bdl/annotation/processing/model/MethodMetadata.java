@@ -1,18 +1,10 @@
 package com.bdl.annotation.processing.model;
 
-import static java.util.Comparator.comparing;
-
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ElementKind;
@@ -20,6 +12,13 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Comparator.comparing;
 
 /**
  * Holder of metadata for a method ExecutableElement.
@@ -29,9 +28,10 @@ import javax.lang.model.element.VariableElement;
 @AutoValue
 public abstract class MethodMetadata implements Comparable<MethodMetadata>, UsesTypes, Annotatable {
 
-  private static final Comparator<MethodMetadata> COMPARATOR = comparing(MethodMetadata::visibility)
-      .thenComparing(MethodMetadata::name)
-      .thenComparing(MethodMetadata::parameters, Comparators.forLists(ParameterMetadata::type));
+  private static final Comparator<MethodMetadata> COMPARATOR =
+      comparing(MethodMetadata::visibility)
+          .thenComparing(MethodMetadata::name)
+          .thenComparing(MethodMetadata::parameters, Comparators.forLists(ParameterMetadata::type));
 
   @Override
   public abstract ImmutableList<AnnotationMetadata> annotations();
@@ -50,26 +50,30 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
 
   MethodMetadata convertTypeParameters(Map<String, String> paramNameMap) {
     paramNameMap = augmentParamNameMap(paramNameMap);
-    Builder metadata = MethodMetadata.builder()
-        .setVisibility(visibility())
-        .setIsAbstract(isAbstract())
-        .setName(name())
-        .setType(type().convertTypeParams(paramNameMap));
+    Builder metadata =
+        MethodMetadata.builder()
+            .setVisibility(visibility())
+            .setIsAbstract(isAbstract())
+            .setName(name())
+            .setType(type().convertTypeParams(paramNameMap));
     for (TypeMetadata typeParam : typeParameters()) {
       metadata.addTypeParameter(typeParam.convertTypeParams(paramNameMap));
     }
     for (ParameterMetadata param : parameters()) {
-      metadata.addParameter(ParameterMetadata.of(
-          param.type().convertTypeParams(paramNameMap),
-          param.name()));
+      metadata.addParameter(
+          ParameterMetadata.of(param.type().convertTypeParams(paramNameMap), param.name()));
     }
     return metadata.build();
   }
 
-  /** Augments the parameter name map to ensure that type parameters specified for this method are not overridden. */
+  /**
+   * Augments the parameter name map to ensure that type parameters specified for this method are
+   * not overridden.
+   */
   private Map<String, String> augmentParamNameMap(Map<String, String> paramNameMap) {
     NameIterator names = new NameIterator();
-    ImmutableMap.Builder<String, String> augmented = ImmutableMap.<String, String>builder().putAll(paramNameMap);
+    ImmutableMap.Builder<String, String> augmented =
+        ImmutableMap.<String, String>builder().putAll(paramNameMap);
 
     for (TypeMetadata typeParam : typeParameters()) {
       String name = nextClearName(paramNameMap, names, typeParam.name());
@@ -108,20 +112,24 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
     if (typeParameters().isEmpty()) {
       return "";
     }
-    return String.format("<%s> ",
-        typeParameters().stream()
+    return String.format(
+        "<%s> ",
+        typeParameters()
+            .stream()
             .map(input -> input.toString(imports, true))
             .collect(Collectors.joining(", ")));
   }
 
   public String toString(Imports imports) {
-    return String.format("%s%s%s%s %s(%s)",
+    return String.format(
+        "%s%s%s%s %s(%s)",
         visibility().prefix(),
         isAbstract() ? "abstract " : "",
         typeParametersPrefix(imports),
         type().toString(imports),
         name(),
-        parameters().stream()
+        parameters()
+            .stream()
             .map((param) -> param.toString(imports))
             .collect(Collectors.joining(", ")));
   }
@@ -142,18 +150,18 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
   abstract Builder toBuilder();
 
   public static Builder builder() {
-    return new AutoValue_MethodMetadata.Builder()
-        .setIsAbstract(false);
+    return new AutoValue_MethodMetadata.Builder().setIsAbstract(false);
   }
 
   static MethodMetadata fromMethod(ExecutableElement element) {
-    Preconditions.checkArgument(element.getKind() == ElementKind.METHOD,
-        "Element %s is not a method.", element);
-    Builder metadata = builder()
-        .setVisibility(Visibility.forElement(element))
-        .setIsAbstract(element.getModifiers().contains(Modifier.ABSTRACT))
-        .setType(TypeMetadata.fromType(element.getReturnType()))
-        .setName(element.getSimpleName().toString());
+    Preconditions.checkArgument(
+        element.getKind() == ElementKind.METHOD, "Element %s is not a method.", element);
+    Builder metadata =
+        builder()
+            .setVisibility(Visibility.forElement(element))
+            .setIsAbstract(element.getModifiers().contains(Modifier.ABSTRACT))
+            .setType(TypeMetadata.fromType(element.getReturnType()))
+            .setName(element.getSimpleName().toString());
 
     for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
       metadata.addAnnotation(AnnotationMetadata.fromType(annotationMirror));
@@ -166,15 +174,14 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
     for (VariableElement parameter : element.getParameters()) {
       metadata.addParameter(
           ParameterMetadata.of(
-              TypeMetadata.fromType(parameter.asType()),
-              parameter.getSimpleName().toString()));
+              TypeMetadata.fromType(parameter.asType()), parameter.getSimpleName().toString()));
     }
 
     return metadata.build();
   }
 
   @AutoValue.Builder
-  public static abstract class Builder {
+  public abstract static class Builder {
     abstract ImmutableList.Builder<AnnotationMetadata> annotationsBuilder();
 
     public abstract Builder setVisibility(Visibility visibility);
@@ -195,8 +202,8 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
     }
 
     public Builder addTypeParameter(TypeMetadata metadata) {
-      Preconditions.checkArgument(metadata.isTypeParameter(),
-          "Cannot add %s as a type parameter.", metadata);
+      Preconditions.checkArgument(
+          metadata.isTypeParameter(), "Cannot add %s as a type parameter.", metadata);
       typeParametersBuilder().add(metadata);
       return this;
     }
