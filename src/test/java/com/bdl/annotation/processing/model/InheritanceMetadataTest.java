@@ -44,6 +44,7 @@ public class InheritanceMetadataTest {
             InheritanceMetadata.builder()
                 .setClassMetadata(
                     ClassMetadata.builder()
+                        .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                         .setCategory(Category.INTERFACE)
                         .setType(
                             TypeMetadata.builder()
@@ -74,6 +75,7 @@ public class InheritanceMetadataTest {
                 .addInheritanceParam(simpleTypeParam("S"))
                 .setClassMetadata(
                     ClassMetadata.builder()
+                        .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                         .setCategory(Category.INTERFACE)
                         .setType(
                             TypeMetadata.builder()
@@ -115,6 +117,7 @@ public class InheritanceMetadataTest {
                 .addInheritanceParam(simpleTypeParam("C"))
                 .setClassMetadata(
                     ClassMetadata.builder()
+                        .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                         .setCategory(Category.INTERFACE)
                         .setType(
                             TypeMetadata.builder()
@@ -131,6 +134,7 @@ public class InheritanceMetadataTest {
                                 .addInheritanceParam(simpleTypeParam("S"))
                                 .setClassMetadata(
                                     ClassMetadata.builder()
+                                        .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                                         .setCategory(Category.INTERFACE)
                                         .setType(
                                             TypeMetadata.builder()
