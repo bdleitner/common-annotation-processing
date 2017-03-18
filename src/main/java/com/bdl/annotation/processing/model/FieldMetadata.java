@@ -79,8 +79,8 @@ public abstract class FieldMetadata implements Annotatable, Comparable<FieldMeta
     for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
       field.addAnnotation(AnnotationMetadata.fromType(annotation));
     }
-    Modifiers.Builder modifiersBuilder = Modifiers.builder()
-        .setVisibility(Visibility.forElement(element));
+    Modifiers.Builder modifiersBuilder =
+        Modifiers.builder().setVisibility(Visibility.forElement(element));
     Set<Modifier> modifiers = element.getModifiers();
     if (modifiers.contains(Modifier.STATIC)) {
       modifiersBuilder.makeStatic();
@@ -97,8 +97,7 @@ public abstract class FieldMetadata implements Annotatable, Comparable<FieldMeta
   }
 
   public static Builder builder() {
-    return new AutoValue_FieldMetadata.Builder()
-        .modifiers(Modifiers.builder().build());
+    return new AutoValue_FieldMetadata.Builder().modifiers(Modifiers.builder().build());
   }
 
   @AutoValue.Builder

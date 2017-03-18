@@ -19,8 +19,8 @@ public abstract class Modifiers {
   public abstract boolean isFinal();
 
   private Modifiers validate() {
-    Preconditions.checkState(!isAbstract() || !isFinal(),
-        "abstract + final modifier combination is not allowed.");
+    Preconditions.checkState(
+        !isAbstract() || !isFinal(), "abstract + final modifier combination is not allowed.");
     return this;
   }
 

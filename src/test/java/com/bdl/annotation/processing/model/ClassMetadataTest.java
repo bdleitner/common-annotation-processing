@@ -34,6 +34,12 @@ public class ClassMetadataTest {
   }
 
   @Test
+  public void testModifiers() {
+    assertThat(metadata.modifiers())
+        .isEqualTo(Modifiers.visibility(Visibility.PACKAGE_LOCAL).makeAbstract());
+  }
+
+  @Test
   public void testFields() {
     TypeMetadata classType =
         TypeMetadata.builder()

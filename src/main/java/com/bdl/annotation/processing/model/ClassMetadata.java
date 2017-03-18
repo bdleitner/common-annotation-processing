@@ -8,6 +8,7 @@ import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -47,6 +48,8 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
 
   @Override
   public abstract ImmutableList<AnnotationMetadata> annotations();
+
+  public abstract Modifiers modifiers();
 
   /** The AutoAdaptee's {@link Category}. */
   public abstract Category category();
@@ -125,7 +128,10 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
       Set<MethodMetadata> methods = methodStream.collect(Collectors.toSet());
 
       Set<MethodMetadata> concreteMethods =
-          methods.stream().filter((method) -> !method.modifiers().isAbstract()).collect(Collectors.toSet());
+          methods
+              .stream()
+              .filter((method) -> !method.modifiers().isAbstract())
+              .collect(Collectors.toSet());
 
       Set<MethodMetadata> abstractMethods =
           methods
@@ -161,7 +167,22 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
 
   public static ClassMetadata fromElement(Element element) {
     TypeMetadata type = TypeMetadata.fromElement(element);
-    Builder metadata = builder().setCategory(Category.forKind(element.getKind())).setType(type);
+
+    Modifiers modifiers = Modifiers.visibility(Visibility.forElement(element));
+    if (element.getModifiers().contains(Modifier.ABSTRACT)) {
+      modifiers = modifiers.makeAbstract();
+    }
+    if (element.getModifiers().contains(Modifier.STATIC)) {
+      modifiers = modifiers.makeStatic();
+    }
+    if (element.getModifiers().contains(Modifier.FINAL)) {
+      modifiers = modifiers.makeFinal();
+    }
+    Builder metadata =
+        builder()
+            .setModifiers(modifiers)
+            .setCategory(Category.forKind(element.getKind()))
+            .setType(type);
 
     for (AnnotationMirror annotationMirror : element.getAnnotationMirrors()) {
       metadata.addAnnotation(AnnotationMetadata.fromType(annotationMirror));
@@ -192,12 +213,15 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
   }
 
   public static Builder builder() {
-    return new AutoValue_ClassMetadata.Builder();
+    return new AutoValue_ClassMetadata.Builder()
+        .setModifiers(Modifiers.visibility(Visibility.PUBLIC));
   }
 
   @AutoValue.Builder
   public abstract static class Builder {
     abstract ImmutableList.Builder<AnnotationMetadata> annotationsBuilder();
+
+    public abstract Builder setModifiers(Modifiers modifiers);
 
     public abstract Builder setCategory(Category category);
 
