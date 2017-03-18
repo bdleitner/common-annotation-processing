@@ -10,6 +10,7 @@ import org.junit.runners.JUnit4;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 
+import static com.bdl.annotation.processing.model.TypeMetadata.VOID;
 import static com.bdl.annotation.processing.model.TypeMetadata.simpleTypeParam;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -24,10 +25,11 @@ public class ClassMetadataTest {
   @Rule public final CompilationRule compilation = new CompilationRule();
 
   private ClassMetadata metadata;
+  private Elements elements;
 
   @Before
   public void before() {
-    Elements elements = compilation.getElements();
+    elements = compilation.getElements();
     TypeElement element =
         elements.getTypeElement("com.bdl.annotation.processing.model.AbstractClass");
     metadata = ClassMetadata.fromElement(element);
@@ -176,6 +178,29 @@ public class ClassMetadataTest {
                 .setName("fromSuper")
                 .addParameter(ParameterMetadata.of(TypeMetadata.INT, "foo"))
                 .build());
+  }
+
+  @Test
+  public void testAllMethodsDoesNotDoubleCount() {
+    metadata = ClassMetadata.fromElement(elements.getTypeElement(
+        "com.bdl.annotation.processing.model.TwoMethods.TwoMethodsOneImplemented"));
+    assertThat(metadata.getAllMethods()).containsAllOf(
+        MethodMetadata.builder()
+            .setModifiers(Modifiers.visibility(Visibility.PUBLIC))
+            .setType(VOID)
+            .setName("one")
+        .build(),
+        MethodMetadata.builder()
+            .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
+            .setType(VOID)
+            .setName("two")
+        .build());
+    assertThat(metadata.getAllMethods()).doesNotContain(
+        MethodMetadata.builder()
+            .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
+            .setType(VOID)
+            .setName("one")
+        .build());
   }
 
   @Test

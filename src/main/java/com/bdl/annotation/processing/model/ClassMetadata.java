@@ -13,8 +13,11 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Metadata class for a relevant parts of a class to write.
@@ -76,7 +79,7 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
         inheritances()
             .stream()
             .map((inheritance) -> inheritance.classMetadata().type())
-            .collect(Collectors.toSet()));
+            .collect(toSet()));
     for (AnnotationMetadata annotation : annotations()) {
       imports.addAll(annotation.getAllTypes());
     }
@@ -111,6 +114,11 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
 
   /** Methods declared in this type or in any supertype / interface. */
   public ImmutableList<MethodMetadata> getAllMethods() {
+    return getAllMethods(s -> {});
+  }
+
+  /** Methods declared in this type or in any supertype / interface. */
+  public ImmutableList<MethodMetadata> getAllMethods(Consumer<String> log) {
     if (allMethods == null) {
       Stream<MethodMetadata> methodStream = Stream.empty();
       for (InheritanceMetadata inheritance : inheritances()) {
@@ -125,27 +133,27 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
 
       methodStream = Stream.concat(methodStream, methods().stream());
 
-      Set<MethodMetadata> methods = methodStream.collect(Collectors.toSet());
+      Set<MethodMetadata> methods = methodStream.collect(toSet());
 
       Set<MethodMetadata> concreteMethods =
-          methods
-              .stream()
-              .filter((method) -> !method.modifiers().isAbstract())
-              .collect(Collectors.toSet());
+          methods.stream().filter((method) -> !method.modifiers().isAbstract()).collect(toSet());
+
+      Set<MethodMetadata> strippedConcreteMethods =
+          concreteMethods.stream().map(MethodMetadata::withoutAnnotations).collect(toSet());
+
+      log.accept("Concrete Methods");
+      concreteMethods.forEach(method -> log.accept(method.toString()));
 
       Set<MethodMetadata> abstractMethods =
           methods
               .stream()
               .filter(method -> method.modifiers().isAbstract())
               .filter(
-                  (method) ->
-                      !concreteMethods.contains(
-                          method
-                              .toBuilder()
-                              .setModifiers(
-                                  method.modifiers().toBuilder().setIsAbstract(false).build())
-                              .build()))
-              .collect(Collectors.toSet());
+                  method ->
+                      !strippedConcreteMethods.contains(method.asConcrete().withoutAnnotations()))
+              .collect(toSet());
+      log.accept("Abstract Methods");
+      abstractMethods.forEach(method -> log.accept(method.toString()));
 
       allMethods =
           ImmutableList.copyOf(

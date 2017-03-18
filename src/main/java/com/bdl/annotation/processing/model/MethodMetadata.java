@@ -139,6 +139,10 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
     return toBuilder().setModifiers(modifiers().toBuilder().setIsAbstract(false).build()).build();
   }
 
+  public MethodMetadata withoutAnnotations() {
+    return toBuilder().setAnnotations(ImmutableList.of()).build();
+  }
+
   @Override
   public String toString() {
     return toString(Imports.empty());
@@ -183,6 +187,8 @@ public abstract class MethodMetadata implements Comparable<MethodMetadata>, Uses
 
   @AutoValue.Builder
   public abstract static class Builder {
+    abstract Builder setAnnotations(ImmutableList<AnnotationMetadata> annotations);
+
     abstract ImmutableList.Builder<AnnotationMetadata> annotationsBuilder();
 
     public abstract Builder setModifiers(Modifiers modifiers);
