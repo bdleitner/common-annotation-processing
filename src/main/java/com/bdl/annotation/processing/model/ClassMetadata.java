@@ -96,7 +96,7 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
                 inheritance
                     .getAllFields()
                     .stream()
-                    .filter((field) -> field.visibility() != Visibility.PRIVATE));
+                    .filter((field) -> field.modifiers().visibility() != Visibility.PRIVATE));
       }
 
       fieldStream = Stream.concat(fieldStream, fields().stream());
@@ -117,7 +117,7 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
                 inheritance
                     .getAllMethods()
                     .stream()
-                    .filter((method) -> method.visibility() != Visibility.PRIVATE));
+                    .filter((method) -> method.modifiers().visibility() != Visibility.PRIVATE));
       }
 
       methodStream = Stream.concat(methodStream, methods().stream());
@@ -125,15 +125,20 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
       Set<MethodMetadata> methods = methodStream.collect(Collectors.toSet());
 
       Set<MethodMetadata> concreteMethods =
-          methods.stream().filter((method) -> !method.isAbstract()).collect(Collectors.toSet());
+          methods.stream().filter((method) -> !method.modifiers().isAbstract()).collect(Collectors.toSet());
 
       Set<MethodMetadata> abstractMethods =
           methods
               .stream()
-              .filter(MethodMetadata::isAbstract)
+              .filter(method -> method.modifiers().isAbstract())
               .filter(
                   (method) ->
-                      !concreteMethods.contains(method.toBuilder().setIsAbstract(false).build()))
+                      !concreteMethods.contains(
+                          method
+                              .toBuilder()
+                              .setModifiers(
+                                  method.modifiers().toBuilder().setIsAbstract(false).build())
+                              .build()))
               .collect(Collectors.toSet());
 
       allMethods =

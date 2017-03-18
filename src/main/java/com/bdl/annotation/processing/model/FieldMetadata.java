@@ -21,18 +21,15 @@ import java.util.Set;
 public abstract class FieldMetadata implements Annotatable, Comparable<FieldMetadata>, UsesTypes {
 
   private static final Comparator<FieldMetadata> COMPARATOR =
-      Comparator.comparing(FieldMetadata::visibility).thenComparing(FieldMetadata::name);
+      Comparator.comparing((FieldMetadata field) -> field.modifiers().visibility())
+          .thenComparing(FieldMetadata::name);
 
   public abstract TypeMetadata containingClass();
 
   @Override
   public abstract ImmutableList<AnnotationMetadata> annotations();
 
-  public abstract Visibility visibility();
-
-  public abstract boolean isStatic();
-
-  public abstract boolean isFinal();
+  public abstract Modifiers modifiers();
 
   public abstract TypeMetadata type();
 
@@ -46,9 +43,9 @@ public abstract class FieldMetadata implements Annotatable, Comparable<FieldMeta
   public String toString(Imports imports) {
     return String.format(
         "%s%s%s%s %s",
-        visibility().prefix(),
-        isStatic() ? "static " : "",
-        isFinal() ? "final " : "",
+        modifiers().visibility().prefix(),
+        modifiers().isStatic() ? "static " : "",
+        modifiers().isFinal() ? "final " : "",
         type().toString(imports),
         name());
   }
@@ -82,22 +79,26 @@ public abstract class FieldMetadata implements Annotatable, Comparable<FieldMeta
     for (AnnotationMirror annotation : element.getAnnotationMirrors()) {
       field.addAnnotation(AnnotationMetadata.fromType(annotation));
     }
-    field
-        .visibility(Visibility.forElement(element))
-        .name(element.getSimpleName().toString())
-        .type(TypeMetadata.fromType(element.asType()));
+    Modifiers.Builder modifiersBuilder = Modifiers.builder()
+        .setVisibility(Visibility.forElement(element));
     Set<Modifier> modifiers = element.getModifiers();
     if (modifiers.contains(Modifier.STATIC)) {
-      field.isStatic(true);
+      modifiersBuilder.makeStatic();
     }
     if (modifiers.contains(Modifier.FINAL)) {
-      field.isFinal(true);
+      modifiersBuilder.makeFinal();
     }
+
+    field
+        .modifiers(modifiersBuilder.build())
+        .name(element.getSimpleName().toString())
+        .type(TypeMetadata.fromType(element.asType()));
     return field.build();
   }
 
   public static Builder builder() {
-    return new AutoValue_FieldMetadata.Builder().isStatic(false).isFinal(false);
+    return new AutoValue_FieldMetadata.Builder()
+        .modifiers(Modifiers.builder().build());
   }
 
   @AutoValue.Builder
@@ -107,11 +108,7 @@ public abstract class FieldMetadata implements Annotatable, Comparable<FieldMeta
 
     abstract ImmutableList.Builder<AnnotationMetadata> annotationsBuilder();
 
-    public abstract Builder visibility(Visibility visibility);
-
-    public abstract Builder isStatic(boolean isStatic);
-
-    public abstract Builder isFinal(boolean isFinal);
+    public abstract Builder modifiers(Modifiers modifiers);
 
     public abstract Builder type(TypeMetadata type);
 

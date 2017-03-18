@@ -50,8 +50,7 @@ public class MethodMetadataTest {
   public void testEqualityIgnoresParameterNames() {
     MethodMetadata method1 =
         MethodMetadata.builder()
-            .setVisibility(Visibility.PUBLIC)
-            .setIsAbstract(true)
+            .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
             .setType(TypeMetadata.INT)
             .setName("add")
             .addParameter(ParameterMetadata.of(TypeMetadata.INT, "first"))
@@ -59,8 +58,7 @@ public class MethodMetadataTest {
             .build();
     MethodMetadata method2 =
         MethodMetadata.builder()
-            .setVisibility(Visibility.PUBLIC)
-            .setIsAbstract(true)
+            .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
             .setType(TypeMetadata.INT)
             .setName("add")
             .addParameter(ParameterMetadata.of(TypeMetadata.INT, "anInt"))
@@ -78,8 +76,7 @@ public class MethodMetadataTest {
     assertThat(method)
         .isEqualTo(
             MethodMetadata.builder()
-                .setVisibility(Visibility.PUBLIC)
-                .setIsAbstract(true)
+                .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                 .setType(TypeMetadata.INT)
                 .setName("add")
                 .addParameter(ParameterMetadata.of(TypeMetadata.INT, "first"))
@@ -92,8 +89,7 @@ public class MethodMetadataTest {
     assertThat(method)
         .isEqualTo(
             MethodMetadata.builder()
-                .setVisibility(Visibility.PUBLIC)
-                .setIsAbstract(true)
+                .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                 .setType(TypeMetadata.STRING)
                 .setName("repeat")
                 .addParameter(ParameterMetadata.of(TypeMetadata.STRING, "template"))
@@ -111,8 +107,7 @@ public class MethodMetadataTest {
     assertThat(actual)
         .isEqualTo(
             MethodMetadata.builder()
-                .setVisibility(Visibility.PUBLIC)
-                .setIsAbstract(true)
+                .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                 .setName("annotatedSomething")
                 .setType(TypeMetadata.VOID)
                 .addAnnotation(
@@ -135,8 +130,7 @@ public class MethodMetadataTest {
     assertThat(actual)
         .isEqualTo(
             MethodMetadata.builder()
-                .setVisibility(Visibility.PUBLIC)
-                .setIsAbstract(true)
+                .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                 .setName("arraysMethod")
                 .setType(TypeMetadata.STRING.arrayOf())
                 .addParameter(ParameterMetadata.of(TypeMetadata.INT.arrayOf().arrayOf(), "inputs"))
@@ -160,8 +154,7 @@ public class MethodMetadataTest {
             .build();
     MethodMetadata expected =
         MethodMetadata.builder()
-            .setVisibility(Visibility.PUBLIC)
-            .setIsAbstract(true)
+            .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
             .addTypeParameter(TypeMetadata.simpleTypeParam("A"))
             .addTypeParameter(bType)
             .setType(
@@ -196,8 +189,7 @@ public class MethodMetadataTest {
             getMethodElement("com.bdl.annotation.processing.model.ComplexParameterized", "extend"));
     MethodMetadata expected =
         MethodMetadata.builder()
-            .setVisibility(Visibility.PUBLIC)
-            .setIsAbstract(true)
+            .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
             .addTypeParameter(TypeMetadata.simpleTypeParam("T"))
             .setType(TypeMetadata.simpleTypeParam("T"))
             .setName("extend")
@@ -222,8 +214,7 @@ public class MethodMetadataTest {
 
     expected =
         MethodMetadata.builder()
-            .setVisibility(Visibility.PUBLIC)
-            .setIsAbstract(true)
+            .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
             .addTypeParameter(TypeMetadata.simpleTypeParam("B"))
             .setType(TypeMetadata.simpleTypeParam("B"))
             .setName("extend")

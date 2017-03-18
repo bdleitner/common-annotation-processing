@@ -55,7 +55,7 @@ public class FieldMetadataTest {
         .isEqualTo(
             FieldMetadata.builder()
                 .containingClass(hasFieldsType)
-                .visibility(Visibility.PRIVATE)
+                .modifiers(Modifiers.visibility(Visibility.PRIVATE))
                 .name("foo")
                 .type(TypeMetadata.STRING)
                 .build());
@@ -66,7 +66,7 @@ public class FieldMetadataTest {
         .isEqualTo(
             FieldMetadata.builder()
                 .containingClass(hasFieldsType)
-                .visibility(Visibility.PROTECTED)
+                .modifiers(Modifiers.visibility(Visibility.PROTECTED))
                 .name("bar")
                 .type(TypeMetadata.OBJECT)
                 .build());
@@ -79,8 +79,7 @@ public class FieldMetadataTest {
                 .containingClass(hasFieldsType)
                 .addAnnotation(
                     AnnotationMetadata.builder().setType(TestingTypes.SOME_ANNOTATION).build())
-                .visibility(Visibility.PUBLIC)
-                .isStatic(true)
+                .modifiers(Modifiers.visibility(Visibility.PUBLIC).makeStatic())
                 .name("baz")
                 .type(TypeMetadata.INT)
                 .build());
@@ -91,8 +90,7 @@ public class FieldMetadataTest {
         .isEqualTo(
             FieldMetadata.builder()
                 .containingClass(hasFieldsType)
-                .visibility(Visibility.PACKAGE_LOCAL)
-                .isFinal(true)
+                .modifiers(Modifiers.visibility(Visibility.PACKAGE_LOCAL).makeFinal())
                 .name("blargh")
                 .type(TypeMetadata.LONG)
                 .build());
@@ -103,9 +101,7 @@ public class FieldMetadataTest {
         .isEqualTo(
             FieldMetadata.builder()
                 .containingClass(hasFieldsType)
-                .visibility(Visibility.PRIVATE)
-                .isStatic(true)
-                .isFinal(true)
+                .modifiers(Modifiers.visibility(Visibility.PRIVATE).makeStatic().makeFinal())
                 .name("threeDArray")
                 .type(TypeMetadata.INT.arrayOf().arrayOf().arrayOf())
                 .build());

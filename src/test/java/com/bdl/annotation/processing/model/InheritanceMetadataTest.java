@@ -52,8 +52,8 @@ public class InheritanceMetadataTest {
                                 .build())
                         .addMethod(
                             MethodMetadata.builder()
-                                .setVisibility(Visibility.PUBLIC)
-                                .setIsAbstract(true)
+                                .setModifiers(
+                                    Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                                 .setType(TypeMetadata.STRING)
                                 .setName("thingToString")
                                 .addParameter(ParameterMetadata.of(TestingTypes.THING, "thing"))
@@ -83,8 +83,8 @@ public class InheritanceMetadataTest {
                                 .build())
                         .addMethod(
                             MethodMetadata.builder()
-                                .setVisibility(Visibility.PUBLIC)
-                                .setIsAbstract(true)
+                                .setModifiers(
+                                    Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                                 .setType(TestingTypes.PARAM_T)
                                 .setName("frozzle")
                                 .addParameter(ParameterMetadata.of(TestingTypes.PARAM_T, "input"))
@@ -95,8 +95,7 @@ public class InheritanceMetadataTest {
     assertThat(actual.getAllMethods())
         .containsExactly(
             MethodMetadata.builder()
-                .setVisibility(Visibility.PUBLIC)
-                .setIsAbstract(true)
+                .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                 .setType(TestingTypes.PARAM_S)
                 .setName("frozzle")
                 .addParameter(ParameterMetadata.of(TestingTypes.PARAM_S, "input"))
@@ -142,8 +141,9 @@ public class InheritanceMetadataTest {
                                                 .build())
                                         .addMethod(
                                             MethodMetadata.builder()
-                                                .setVisibility(Visibility.PUBLIC)
-                                                .setIsAbstract(true)
+                                                .setModifiers(
+                                                    Modifiers.visibility(Visibility.PUBLIC)
+                                                        .makeAbstract())
                                                 .setType(TestingTypes.PARAM_T)
                                                 .setName("frozzle")
                                                 .addParameter(
@@ -154,8 +154,8 @@ public class InheritanceMetadataTest {
                                 .build())
                         .addMethod(
                             MethodMetadata.builder()
-                                .setVisibility(Visibility.PUBLIC)
-                                .setIsAbstract(true)
+                                .setModifiers(
+                                    Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                                 .setType(TestingTypes.PARAM_S)
                                 .setName("extendedFrozzle")
                                 .addParameter(ParameterMetadata.of(TestingTypes.PARAM_S, "input"))
@@ -166,15 +166,13 @@ public class InheritanceMetadataTest {
     assertThat(actual.getAllMethods())
         .containsExactly(
             MethodMetadata.builder()
-                .setVisibility(Visibility.PUBLIC)
-                .setIsAbstract(true)
+                .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                 .setType(simpleTypeParam("C"))
                 .setName("frozzle")
                 .addParameter(ParameterMetadata.of(simpleTypeParam("C"), "input"))
                 .build(),
             MethodMetadata.builder()
-                .setVisibility(Visibility.PUBLIC)
-                .setIsAbstract(true)
+                .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                 .setType(simpleTypeParam("C"))
                 .setName("extendedFrozzle")
                 .addParameter(ParameterMetadata.of(simpleTypeParam("C"), "input"))
