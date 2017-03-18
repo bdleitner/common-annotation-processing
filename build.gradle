@@ -13,11 +13,13 @@ group 'com.bdl'
 version '1.0-SNAPSHOT'
 
 repositories {
+    mavenLocal()
     mavenCentral()
     jcenter()
     maven { url "https://jitpack.io" }
 }
 
+apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'net.ltgt.apt'
