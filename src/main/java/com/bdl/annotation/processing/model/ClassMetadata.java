@@ -13,7 +13,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -114,11 +113,6 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
 
   /** Methods declared in this type or in any supertype / interface. */
   public ImmutableList<MethodMetadata> getAllMethods() {
-    return getAllMethods(s -> {});
-  }
-
-  /** Methods declared in this type or in any supertype / interface. */
-  public ImmutableList<MethodMetadata> getAllMethods(Consumer<String> log) {
     if (allMethods == null) {
       Stream<MethodMetadata> methodStream = Stream.empty();
       for (InheritanceMetadata inheritance : inheritances()) {
@@ -141,9 +135,6 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
       Set<MethodMetadata> strippedConcreteMethods =
           concreteMethods.stream().map(MethodMetadata::withoutAnnotations).collect(toSet());
 
-      log.accept("Concrete Methods");
-      concreteMethods.forEach(method -> log.accept(method.toString()));
-
       Set<MethodMetadata> abstractMethods =
           methods
               .stream()
@@ -152,8 +143,6 @@ public abstract class ClassMetadata implements UsesTypes, Annotatable {
                   method ->
                       !strippedConcreteMethods.contains(method.asConcrete().withoutAnnotations()))
               .collect(toSet());
-      log.accept("Abstract Methods");
-      abstractMethods.forEach(method -> log.accept(method.toString()));
 
       allMethods =
           ImmutableList.copyOf(
