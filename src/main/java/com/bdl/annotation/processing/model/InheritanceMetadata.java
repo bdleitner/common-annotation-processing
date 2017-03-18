@@ -97,10 +97,6 @@ public abstract class InheritanceMetadata implements UsesTypes {
     abstract Builder setClassMetadata(ClassMetadata classMetadata);
 
     Builder addInheritanceParam(TypeMetadata type) {
-      Preconditions.checkArgument(
-          type.isTypeParameter(),
-          "Inheritance type params must be type parameters, was %s",
-          type.toString(Imports.empty(), true));
       inheritanceParamsBuilder().add(type);
       return this;
     }

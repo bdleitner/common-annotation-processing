@@ -9,7 +9,7 @@ buildscript {
     }
 }
 
-group 'com.bdl'
+group 'com.bdl.annotation.processing'
 version '1.0-SNAPSHOT'
 
 repositories {

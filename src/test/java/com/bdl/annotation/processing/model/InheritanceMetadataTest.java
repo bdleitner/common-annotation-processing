@@ -13,6 +13,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 
+import static com.bdl.annotation.processing.model.TypeMetadata.BOXED_LONG;
 import static com.bdl.annotation.processing.model.TypeMetadata.simpleTypeParam;
 import static com.google.common.truth.Truth.assertThat;
 
@@ -58,6 +59,39 @@ public class InheritanceMetadataTest {
                                 .setType(TypeMetadata.STRING)
                                 .setName("thingToString")
                                 .addParameter(ParameterMetadata.of(TestingTypes.THING, "thing"))
+                                .build())
+                        .build())
+                .build());
+  }
+
+  @Test
+  public void testConcretelyParameterizedInheritance() {
+    TypeElement element =
+        elements.getTypeElement("com.bdl.annotation.processing.model.ConcreteParameterized");
+    TypeMirror inherited = element.getInterfaces().get(0);
+    InheritanceMetadata actual = InheritanceMetadata.fromType((DeclaredType) inherited);
+    assertThat(actual)
+        .isEqualTo(
+            InheritanceMetadata.builder()
+                .addInheritanceParam(BOXED_LONG)
+                .setClassMetadata(
+                    ClassMetadata.builder()
+                        .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
+                        .setCategory(Category.INTERFACE)
+                        .setType(
+                            TypeMetadata.builder()
+                                .setPackageName("com.bdl.annotation.processing.model")
+                                .setName("Parameterized")
+                                .addParam(TestingTypes.PARAM_T)
+                                .build())
+                        .addMethod(
+                            MethodMetadata.builder()
+                                .setModifiers(
+                                    Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
+                                .setType(TestingTypes.PARAM_T)
+                                .setName("frozzle")
+                                .addParameter(
+                                    ParameterMetadata.of(TestingTypes.PARAM_T, "input"))
                                 .build())
                         .build())
                 .build());
@@ -134,7 +168,8 @@ public class InheritanceMetadataTest {
                                 .addInheritanceParam(simpleTypeParam("S"))
                                 .setClassMetadata(
                                     ClassMetadata.builder()
-                                        .setModifiers(Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
+                                        .setModifiers(
+                                            Modifiers.visibility(Visibility.PUBLIC).makeAbstract())
                                         .setCategory(Category.INTERFACE)
                                         .setType(
                                             TypeMetadata.builder()
